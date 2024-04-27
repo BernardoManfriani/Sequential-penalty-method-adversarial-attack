@@ -1,0 +1,7 @@
+Pillow
+autograd
+cvxpy
+matplotlib
+numpy
+torch
+torchvision
