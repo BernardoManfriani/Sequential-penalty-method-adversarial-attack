@@ -37,7 +37,8 @@ def squat_algorithm(x, xk):
             objective = f_gradient.t()@d + 0.5 * cp.quad_form(d, I)
 
             # CONSTRAINTS - finire
-            g_val = cp.Variable(utility_functions.g(xk,K).shape, value=g(xk,K).detach().numpy())
+
+            g_val = cp.Variable(utility_functions.g(xk).shape, value=utility_functions.g(xk).detach().numpy())
             jacobian = torch.autograd.functional.jacobian(utility_functions.g, xk, create_graph=False, strict=False, vectorize=False, strategy='reverse-mode')
             constraints = [g_val <= 0]
 

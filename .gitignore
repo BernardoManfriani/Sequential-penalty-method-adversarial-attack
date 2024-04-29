@@ -6,6 +6,13 @@ __pycache__/
 # C extensions
 *.so
 
+# Ignora la cartella 'data'
+data/
+
+# Ignora gli ambienti virtuali
+.venv/
+envPW/
+
 # Distribution / packaging
 .Python
 build/
