@@ -10,8 +10,7 @@ __pycache__/
 data/
 
 # Ignora gli ambienti virtuali
-.venv/
-envPW/
+venvPW/
 
 # Distribution / packaging
 .Python
