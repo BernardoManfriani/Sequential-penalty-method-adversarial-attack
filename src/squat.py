@@ -33,7 +33,7 @@ def squat_algorithm(x, xk):
 
             for i in range(28*28):
                 f_gradient[i] = torch.norm(torch.flatten(x)[i]-torch.flatten(xk)[i]) # gradient of f(x) (vector in R^K)
-
+                
             objective = f_gradient.t()@d + 0.5 * cp.quad_form(d, I)
 
             # CONSTRAINTS - finire

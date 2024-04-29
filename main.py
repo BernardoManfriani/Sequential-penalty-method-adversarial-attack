@@ -12,7 +12,7 @@ def main():
     x = a.clone()
     xk = b.clone()
     # start_time = time.time()
-
+    # print("Start")
     squat.squat_algorithm(x, xk)
     
 
