@@ -1,3 +1,4 @@
+
 import random
 from PIL import Image
 from torchvision import transforms
@@ -9,9 +10,13 @@ import torch
 import cvxpy as cp
 import sys
 import os
+import config
+import numpy as np
+import cv2
+
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from src.squat import j, model,K
+from src.squat import model
 
 def get_random_image(target_class, dataset):
   random_index = random.choice([i for i, (_, label) in enumerate(dataset) if label == target_class])
@@ -26,14 +31,46 @@ def show_image(image):
     plt.axis('off')
     plt.show()
 
+# def plot_tensor(t, title = "", dim = 1.0):
+#   plt.figure(figsize=(dim, dim))
+#   plt.imshow(t.squeeze().numpy(), cmap='gray')  # Use grayscale colormap
+#   plt.axis('off')
+#   plt.title(title)
+#   plt.show()
+#   plt.close()
+  
+def plot_tensor(t, title="", dim=1.0):
+    # Converti il tensore in un array NumPy
+    img_array = t.squeeze().numpy()
 
+    # Normalizza l'array per convertirlo in un'immagine in scala di grigi (0-255)
+    img_array = ((img_array - img_array.min()) / (img_array.max() - img_array.min()) * 255).astype(np.uint8)
+    img_array = cv2.resize(img_array, (300, 300))
+    
+    cv2.namedWindow(title, cv2.WINDOW_NORMAL)
+    cv2.moveWindow(title, 500, 300)
+    
+    # Mostra l'immagine utilizzando OpenCV
+    cv2.imshow(title, img_array)
+    cv2.waitKey(200)
+    cv2.destroyWindow(title)
+    
+def g(xk):
+  I = torch.eye(config.classes) # identity matrix of size K
+  ones_vec = torch.ones(config.classes) # all ones vector of size K
+  canonical_vec = torch.zeros(config.classes) # canonical vector of size K
+  canonical_vec[config.j] = 1
+  g_val = (I-(canonical_vec*ones_vec.t())) * torch.argmax(model(xk.reshape(1,28,28)))
+  return g_val
 
-def plot_tensor(t, title = "", dim = 1.0):
-  plt.figure(figsize=(dim, dim))
-  plt.imshow(t.squeeze().numpy(), cmap='gray')  # Use grayscale colormap
-  plt.axis('off')
-  plt.title(title)
-  plt.show()
+def f(x, xk):
+  return (1/2)*torch.norm(x - xk, p='fro')**2
+
+def algebric_f_gradient(x,xk):
+  f_gradient = torch.zeros(28*28)
+  for i in range(28*28):
+    f_gradient[i] = -torch.norm(torch.flatten(x)[i]-torch.flatten(xk)[i]) # gradient of f(x) (vector in R^K)
+  return f_gradient
 
 # def get_random_image_cvxpy(target_class):
 #   # Seleziona un'immagine casuale dalla classe specificata
@@ -50,14 +87,3 @@ def plot_tensor(t, title = "", dim = 1.0):
 #   numpy_image = random_image.numpy().flatten()  # Assicurati che sia un vettore 1D
 #   cvxpy_variable = cp.Variable(numpy_image.shape, value=numpy_image)
 #   return cvxpy_variable  # Restituisce la variabile CVXPY
-
-def g(xk):
-  I = torch.eye(K) # identity matrix of size K
-  ones_vec = torch.ones(K) # all ones vector of size K
-  canonical_vec = torch.zeros(K) # canonical vector of size K
-  canonical_vec[j] = 1
-  g_val = (I-(canonical_vec*ones_vec.t())) * torch.argmax(model(xk))
-  return g_val
-
-def f(x, xk):
-  return (1/2)*torch.norm(x - xk, p='fro')**2

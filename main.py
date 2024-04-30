@@ -2,11 +2,10 @@ from src import data_preparation, model_definition, evaluation, utility_function
 import torch
 from models.small_cnn import SmallCNN
 
-
 def main():
     dataset = data_preparation.load_dataset()
     a = utility_functions.get_random_image(1, dataset)
-    b = utility_functions.get_random_image(1, dataset)
+    b = utility_functions.get_random_image(5, dataset)
     #utility_functions.show_image(a)
 
     x = a.clone()
