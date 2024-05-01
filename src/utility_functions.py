@@ -72,6 +72,27 @@ def algebric_f_gradient(x,xk):
     f_gradient[i] = -torch.norm(torch.flatten(x)[i]-torch.flatten(xk)[i]) # gradient of f(x) (vector in R^K)
   return f_gradient
 
+def compute_f_gradient(x, xk):
+  if config.ALGEBRIC_GRADIENT:
+      f_gradient = algebric_f_gradient(x,xk)
+      # utility_functions.plot_tensor(f_gradient.detach().reshape(1,28,28), title=f"f_gradient (k={k})", dim=1.0)
+  else:
+      xk = torch.tensor(xk.data, requires_grad=True)
+      f = (1/2)*torch.norm(x - xk, p='fro')**2 # frobenius_norm between x and xk
+      f.backward()
+      f_gradient = xk.grad.data
+      f_gradient = f_gradient.flatten()
+      # utility_functions.plot_tensor(f_gradient.detach().reshape(1,28,28), title=f"f_gradient (k={k})", dim=1.0)
+  return f_gradient
+
+
+def compute_lagrangian(x, xk, lambda_k):
+    f_val = f(x, xk)  # Assuming f function exists that computes the objective function value at xk
+    g_val = g(xk)
+    lagrangian = f_val + torch.dot(lambda_k, g_val)
+    return lagrangian
+
+
 # def get_random_image_cvxpy(target_class):
 #   # Seleziona un'immagine casuale dalla classe specificata
 #   random_index = random.choice([i for i, (_, label) in enumerate(dataset) if label == target_class])
@@ -87,3 +108,4 @@ def algebric_f_gradient(x,xk):
 #   numpy_image = random_image.numpy().flatten()  # Assicurati che sia un vettore 1D
 #   cvxpy_variable = cp.Variable(numpy_image.shape, value=numpy_image)
 #   return cvxpy_variable  # Restituisce la variabile CVXPY
+

@@ -6,7 +6,7 @@ Implementation of **SQUAT** Algorithm. (Théo Beuzeville, Alfredo Buttari, Serge
 To run the project:
   - create env 
   - get permission: Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
-  - activate: .\envPw\Scripts\Activate.ps1
+  - activate: .\venvPw\Scripts\Activate.ps1
   - pip install -r .\requirements.txt
   - ./main.py
 
