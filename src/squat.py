@@ -20,8 +20,7 @@ else:
     device = "cpu"
 
 model = SmallCNN()
-# model.load_state_dict(torch.load("training/smallcnn_regular/model-nn-epoch10.pt")) #For CUDA
-model.load_state_dict(torch.load(f"{os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))}/training/smallcnn_regular/model-nn-epoch10.pt", map_location=torch.device(device)))
+model.load_state_dict(torch.load(f"{os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))}/checkpoints/smallcnn_regular/model-nn-epoch10.pt", map_location=torch.device(device)))
 
 d = cp.Variable(28*28) # direction (variable of the optimization problem)
 I = torch.eye(28*28) # identity matrix
@@ -70,10 +69,16 @@ def squat_algorithm(x, xk):
                 xk = xk.reshape(28,28)
                 xk = xk.to(torch.float32)
                 
-            utility_functions.plot_tensor(xk, f"x{k+1}", dim=2)
+            utility_functions.plot_tensor(xk, f"x{k}", dim=2)
+            
             # sleep(30)
             # print(f"Model prediction for x_{k+1}: {model(xk.reshape(1,28,28))}")
             print(f"Model prediction for x_{k+1}: {torch.argmax(model(xk.reshape(1,28,28)))}")
+            
+            # if torch.argmax(model(xk.reshape(1,28,28))) == config.j:
+            #     print("SmallCNN has been corrupted")
+            #     utility_functions.show_image(xk)
+            #     break
 
         if k>config.N_1:
             # # SECOND ORDER
@@ -108,8 +113,10 @@ def squat_algorithm(x, xk):
             # Update lambda_k based on some dual update rule (not explicitly defined here)
             lambda_k += config.alpha_dual * torch.from_numpy(g_val)  # Update rule for lambda_k needs to be defined appropriately
 
-            utility_functions.plot_tensor(xk, f"x_{k+1}", dim=2)
+            # utility_functions.plot_tensor(xk, f"x_{k+1}", dim=2)
+            utility_functions.show_image(xk)
             print(f"Model prediction for x_{k+1}: {torch.argmax(model(xk.reshape(1,28,28)))}")
                 
             # SECOND ORDER
             # torch.autograd.functional.hessian or torch.autograd.functional.jacobian
+    utility_functions.show_image(xk)

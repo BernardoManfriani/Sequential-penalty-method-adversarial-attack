@@ -80,7 +80,7 @@ def compute_f_gradient(x, xk):
       xk = torch.tensor(xk.data, requires_grad=True)
       f = (1/2)*torch.norm(x - xk, p='fro')**2 # frobenius_norm between x and xk
       f.backward()
-      f_gradient = xk.grad.data
+      f_gradient = xk.grad.data.sign()
       f_gradient = f_gradient.flatten()
       # utility_functions.plot_tensor(f_gradient.detach().reshape(1,28,28), title=f"f_gradient (k={k})", dim=1.0)
   return f_gradient
