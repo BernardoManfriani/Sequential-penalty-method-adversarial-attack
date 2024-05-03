@@ -22,7 +22,7 @@ $ python train_regular_mnist.py \
   --beta 1.0 \
   --seed 1 \
   --log-interval 100 \
-  --model-dir 'Adversarial-attacks-via-Sequential-Quadratic-Programming\training\smallcnn_regular' \
+  --model-dir 'Adversarial-attacks-via-Sequential-Quadratic-Programming\checkpoints\smallcnn_regular' \
   --save-freq 10
 ```
 
@@ -40,7 +40,7 @@ $ python train_trades_mnist.py \
   --beta 1.0 \
   --seed 1 \
   --log-interval 100 \
-  --model-dir 'Adversarial-attacks-via-Sequential-Quadratic-Programming\training\smallcnn_trades' \
+  --model-dir 'Adversarial-attacks-via-Sequential-Quadratic-Programming\checkpoints\smallcnn_trades' \
   --save-freq 10
 ```
 
@@ -58,7 +58,7 @@ $ python train_ddn_mnist.py \
   --beta 1.0 \
   --seed 1 \
   --log-interval 100 \
-  --model-dir 'Adversarial-attacks-via-Sequential-Quadratic-Programming\training\smallcnn_ddn' \
+  --model-dir 'Adversarial-attacks-via-Sequential-Quadratic-Programming\checkpoints\smallcnn_ddn' \
   --save-freq 10
 ```
 
