@@ -58,13 +58,11 @@ $ python train_ddn_mnist.py \
   --beta 1.0 \
   --seed 1 \
   --log-interval 100 \
-  --model-dir 'Adversarial-attacks-via-Sequential-Quadratic-Programming\training\smallcnn_trades' \
+  --model-dir 'Adversarial-attacks-via-Sequential-Quadratic-Programming\training\smallcnn_ddn' \
   --save-freq 10
 ```
 
 ## Attack the SmallCNN
-### TRADES attack
-
 ### SQUAT attack
 ```bash
 $ python main.py 
