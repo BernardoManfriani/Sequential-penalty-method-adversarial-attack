@@ -7,14 +7,12 @@ def main():
     a = utility_functions.get_random_image(1, dataset)
     b = utility_functions.get_random_image(5, dataset)
     #utility_functions.show_image(a)
-
     x = a.clone()
     xk = b.clone()
     # start_time = time.time()
     # print("Start")
     squat.squat_algorithm(x, xk)
     
-
     # model = model_definition.define_model()
     # training.train_model(model)
     # evaluation.evaluate_model(model)

@@ -87,9 +87,7 @@ def compute_f_gradient(x, xk):
 
 
 def compute_lagrangian(x, xk, lambda_k):
-    f_val = f(x, xk)  # Assuming f function exists that computes the objective function value at xk
-    g_val = g(xk)
-    lagrangian = f_val + torch.dot(lambda_k, g_val)
+    lagrangian = f(x, xk) + torch.dot(lambda_k, g(xk))
     return lagrangian
 
 

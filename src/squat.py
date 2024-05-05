@@ -42,7 +42,8 @@ def squat_algorithm(x, xk):
             jacobian = torch.autograd.functional.jacobian(utility_functions.g, xk, create_graph=False, strict=False, vectorize=False, strategy='reverse-mode')
             #mostra jacobian 
             # print(f"jacobian: {jacobian.value}")
-            constraints = [g_val <= 0]
+            # constraints = [g_val <= 0]
+            constraints = [g_val <= torch.ones(10,10)*(-100)]
             # constraints = [jacobian.T@d + g_val <= 0]
 
             # QP PROBLEM
@@ -65,7 +66,8 @@ def squat_algorithm(x, xk):
                 xk = xk.to(torch.float32)
             else:
                 xk = xk.detach().numpy().flatten() + config.alpha * optimal_d
-                xk = torch.clamp(torch.tensor(xk), 0.0, 1.0)
+                # xk = torch.clamp(torch.tensor(xk), 0.0, 1.0)
+                xk = torch.tensor(xk)
                 xk = xk.reshape(28,28)
                 xk = xk.to(torch.float32)
                 
@@ -88,7 +90,7 @@ def squat_algorithm(x, xk):
 
             lagrangian = utility_functions.compute_lagrangian(x, xk, lambda_k)
             hessian_lagrangian = torch.autograd.functional.hessian(utility_functions.compute_lagrangian, (xk, lambda_k), create_graph=False)
-            
+            print(hessian_lagrangian.shape)
             # Ensure the Hessian is a numpy array to use in CVXPY
             hessian_lagrangian_np = hessian_lagrangian[0][0].detach().numpy()
             
@@ -111,7 +113,7 @@ def squat_algorithm(x, xk):
             xk = torch.from_numpy(xk.detach().numpy().flatten() + optimal_d).view_as(xk)
             
             # Update lambda_k based on some dual update rule (not explicitly defined here)
-            lambda_k += config.alpha_dual * torch.from_numpy(g_val)  # Update rule for lambda_k needs to be defined appropriately
+            lambda_k = config.alpha_dual * torch.from_numpy(g_val)  # Update rule for lambda_k needs to be defined appropriately
 
             # utility_functions.plot_tensor(xk, f"x_{k+1}", dim=2)
             utility_functions.show_image(xk)
@@ -120,3 +122,5 @@ def squat_algorithm(x, xk):
             # SECOND ORDER
             # torch.autograd.functional.hessian or torch.autograd.functional.jacobian
     utility_functions.show_image(xk)
+
+    

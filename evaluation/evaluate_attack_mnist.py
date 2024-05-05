@@ -15,13 +15,13 @@ parser.add_argument('--model-path',
                     default='./checkpoints/model_mnist_smallcnn.pt',
                     help='model for white-box attack evaluation')
 parser.add_argument('--data-attak-path',
-                    default='./data_attack/mnist_X_adv.npy',
+                    default='Adversarial-attacks-via-Sequential-Quadratic-Programming/data_attack/mnist_X_adv.npy',
                     help='adversarial data for white-box attack evaluation')
 parser.add_argument('--data-path',
-                    default='./data_attack/mnist_X.npy',
+                    default='Adversarial-attacks-via-Sequential-Quadratic-Programming/data_attack/mnist_X.npy',
                     help='data for white-box attack evaluation')
 parser.add_argument('--target-path',
-                    default='./data_attack/mnist_Y.npy',
+                    default='Adversarial-attacks-via-Sequential-Quadratic-Programming/data_attack/mnist_Y.npy',
                     help='target for white-box attack evaluation')
 
 args = parser.parse_args()
