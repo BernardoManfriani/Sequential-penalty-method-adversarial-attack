@@ -1,10 +1,9 @@
 import torch
 import os
 import sys
-#import for sleep
-from time import sleep
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
+from time import sleep
 import cvxpy as cp
 from src import utility_functions
 import torchvision

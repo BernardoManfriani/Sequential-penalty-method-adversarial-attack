@@ -1,10 +1,14 @@
 from __future__ import print_function
+import os
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 import argparse
 import torch
 from torch.autograd import Variable
 from models.small_cnn import *
 import numpy as np
-
+import tensorflow as tf 
 
 parser = argparse.ArgumentParser(description='PyTorch MNIST Attack Evaluation')
 parser.add_argument('--no-cuda', action='store_true', default=False,
@@ -12,16 +16,16 @@ parser.add_argument('--no-cuda', action='store_true', default=False,
 parser.add_argument('--epsilon', default=0.3,
                     help='perturbation')
 parser.add_argument('--model-path',
-                    default='./checkpoints/model_mnist_smallcnn.pt',
+                    default='Adversarial-attacks-via-Sequential-Quadratic-Programming\checkpoints\smallcnn_regular\model-nn-epoch10.pt',
                     help='model for white-box attack evaluation')
 parser.add_argument('--data-attak-path',
                     default='Adversarial-attacks-via-Sequential-Quadratic-Programming/data_attack/mnist_X_adv.npy',
                     help='adversarial data for white-box attack evaluation')
 parser.add_argument('--data-path',
-                    default='Adversarial-attacks-via-Sequential-Quadratic-Programming/data_attack/mnist_X.npy',
+                    default=r'C:\Users\edoar\Desktop\PythonProjects\data\mnist_X.npy',
                     help='data for white-box attack evaluation')
 parser.add_argument('--target-path',
-                    default='Adversarial-attacks-via-Sequential-Quadratic-Programming/data_attack/mnist_Y.npy',
+                    default=r'C:\Users\edoar\Desktop\PythonProjects\data\mnist_Y.npy',
                     help='target for white-box attack evaluation')
 
 args = parser.parse_args()
@@ -35,12 +39,16 @@ kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
 def image_check(min_delta, max_delta, min_image_adv, max_image_adv):
     valid = 1.0
     if min_delta < - args.epsilon:
+        print("1")
+        print(min_delta)
         valid -= 2.0
     elif max_delta > args.epsilon:
         valid -= 2.0
+        print("2")
     elif min_image_adv < 0.0:
         valid -= 2.0
     elif max_image_adv > 1.0:
+        print("3")
         valid -= 2.0
 
     if valid > 0.0:
@@ -95,8 +103,18 @@ def main():
     # white-box attack
     # load model
     model = SmallCNN().to(device)
-    model.load_state_dict(torch.load(args.model_path))
+    model.load_state_dict(torch.load(args.model_path, map_location=torch.device(device)))
 
+    mnist = tf.keras.datasets.mnist
+    (train_images, train_labels), (test_images, test_labels) = mnist.load_data()
+
+    # Salva le prime 500 immagini di test e le relative etichette
+    num_images_to_save = 500
+    test_images_to_save = test_images[:num_images_to_save]
+    test_labels_to_save = test_labels[:num_images_to_save]  
+    np.save('data/mnist_X.npy', test_images_to_save)
+    np.save('data/mnist_Y.npy', test_labels_to_save)
+    
     # load data
     X_adv_data = np.load(args.data_attak_path)
     X_data = np.load(args.data_path)

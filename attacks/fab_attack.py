@@ -1,4 +1,4 @@
-from adv_lib.attacks import ddn
+from adv_lib.attacks import fab
 import torch
 import os
 import sys
@@ -29,12 +29,12 @@ test_loader = torch.utils.data.DataLoader(testset, batch_size=128, shuffle=False
 for data, target in test_loader:
         data, target = data.to(device), target.to(device)
         
-mnist_X_adv = ddn(model=model, inputs=data, labels=target, steps=4000)
+mnist_X_adv = fab(model=model, inputs=data, labels=target, n_iter=4000)
 print(mnist_X_adv.type)
 print(f"target: {target}")
 utility_functions.show_image(mnist_X_adv[0])
 print(f"Prediction: {torch.argmax(model(mnist_X_adv[0]))}")
 
 mnist_X_adv_array = mnist_X_adv.numpy()
-np.save('Adversarial-attacks-via-Sequential-Quadratic-Programming/data_attack/ddn/mnist_X_adv.npy', mnist_X_adv_array)
+np.save('Adversarial-attacks-via-Sequential-Quadratic-Programming/data_attack/fab/mnist_X_adv.npy', mnist_X_adv_array)
 
