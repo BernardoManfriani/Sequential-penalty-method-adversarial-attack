@@ -24,9 +24,9 @@ def get_random_image(target_class, dataset):
   random_image = random_image.float()
   return random_image
 
-def show_image(image):
+def show_image(image, title=""):
     plt.figure(figsize=(2, 2))
-    plt.title("Original example")
+    plt.title(title)
     plt.imshow(image.squeeze().numpy(), cmap='gray')  # Use grayscale colormap
     plt.axis('off')
     plt.show()
@@ -60,7 +60,10 @@ def g(xk):
   ones_vec = torch.ones(config.classes) # all ones vector of size K
   canonical_vec = torch.zeros(config.classes) # canonical vector of size K
   canonical_vec[config.j] = 1
-  g_val = (I-(canonical_vec*ones_vec.t())) * torch.argmax(model(xk.reshape(1,28,28)))
+  # g_val = (I-(canonical_vec*ones_vec.t())) * torch.argmax(model(xk.reshape(1,28,28)))
+  # g_val = (I-(canonical_vec*ones_vec.t())) @ model(xk.reshape(1,28,28)).detach().numpy()
+  # g_val = (I-(canonical_vec*ones_vec.t())) @ (model(xk.reshape(1,28,28))).data.flatten()
+  g_val = torch.matmul((I-(canonical_vec*ones_vec.t())), (model(xk.reshape(1,28,28))).data.flatten())
   return g_val
 
 def f(x, xk):
@@ -80,7 +83,7 @@ def compute_f_gradient(x, xk):
       xk = torch.tensor(xk.data, requires_grad=True)
       f = (1/2)*torch.norm(x - xk, p='fro')**2 # frobenius_norm between x and xk
       f.backward()
-      f_gradient = xk.grad.data.sign()
+      f_gradient = xk.grad.data
       f_gradient = f_gradient.flatten()
       # utility_functions.plot_tensor(f_gradient.detach().reshape(1,28,28), title=f"f_gradient (k={k})", dim=1.0)
   return f_gradient

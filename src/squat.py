@@ -26,11 +26,12 @@ d = cp.Variable(28*28) # direction (variable of the optimization problem)
 I = torch.eye(28*28) # identity matrix
 
 def squat_algorithm(x, xk):
+    utility_functions.show_image(xk, title="x0")
     for k in range (0, config.N_iter):
         
         lambda_k = torch.zeros(utility_functions.g(xk).shape, device=x.device)  # Initialize Lagrange multipliers
         f_gradient = utility_functions.compute_f_gradient(x, xk)
-
+        
         # FIRST ORDER
         if k<=config.N_1:
             
@@ -39,25 +40,28 @@ def squat_algorithm(x, xk):
 
             # CONSTRAINTS - finire
             g_val = cp.Variable(utility_functions.g(xk).shape, value=utility_functions.g(xk).detach().numpy())
-            jacobian = torch.autograd.functional.jacobian(utility_functions.g, xk, create_graph=False, strict=False, vectorize=False, strategy='reverse-mode')
+            jacobian = torch.autograd.functional.jacobian(utility_functions.g, xk.flatten(), create_graph=False, strict=False, vectorize=False, strategy='reverse-mode')
             #mostra jacobian 
-            # print(f"jacobian: {jacobian.value}")
-            # constraints = [g_val <= 0]
-            constraints = [g_val <= torch.ones(10,10)*(-100)]
-            # constraints = [jacobian.T@d + g_val <= 0]
-
+            print(f"jacobian: {jacobian.shape}")
+            
+            constraints = [cp.matmul(jacobian,d) + g_val <= 0]
+            # constraints = [jacobian[0].T@d + g_val <= 0,
+            #     jacobian[1].T@d + g_val <= 0,
+            #     jacobian[2].T@d + g_val <= 0,
+            #     jacobian[3].T@d + g_val <= 0,
+            #     jacobian[4].T@d + g_val <= 0,
+            #     jacobian[5].T@d + g_val <= 0,
+            #     jacobian[6].T@d + g_val <= 0,
+            #     jacobian[7].T@d + g_val <= 0,
+            #     jacobian[8].T@d + g_val <= 0,
+            #     jacobian[9].T@d + g_val <= 0,
+            #     ]
+         
             # QP PROBLEM
             problem = cp.Problem(objective, constraints) # definition of the constrained problem to minimize
             result = problem.solve()
             optimal_d = d.value
             # print(f"d.value: {d.value}")
-
-            #somma tutti i valori di d per capire se da sempre 0
-            # sum_d = 0
-            # for i in range(len(optimal_d)):
-            #     sum_d += optimal_d[i]
-            # print(f"sum_d: {sum_d}")
-
 
             # UPDATE
             if config.ALGEBRIC_GRADIENT:
@@ -71,7 +75,8 @@ def squat_algorithm(x, xk):
                 xk = xk.reshape(28,28)
                 xk = xk.to(torch.float32)
                 
-            utility_functions.plot_tensor(xk, f"x{k}", dim=2)
+            utility_functions.show_image(xk, title=f"x{k+1}")
+            # utility_functions.plot_tensor(xk, f"x{k}", dim=2)
             
             # sleep(30)
             # print(f"Model prediction for x_{k+1}: {model(xk.reshape(1,28,28))}")
