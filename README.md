@@ -88,7 +88,7 @@ $ python .\attacks\squat_attack.py
 ## Robustness Evaluation
 ```bash
 $ python evaluate_attack_mnist.py \
---data-attack-path
+--data-attack-path 'path/to/mnist_X_adv.npy'
 --model-path 'path/to/model.pt',
 --data-attack-path 'data_attack/mnist_X_adv.npy',
 --data-path 'path/to/mnist_X.npy'
