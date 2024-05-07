@@ -16,16 +16,16 @@ parser.add_argument('--no-cuda', action='store_true', default=False,
 parser.add_argument('--epsilon', default=0.3,
                     help='perturbation')
 parser.add_argument('--model-path',
-                    default='Adversarial-attacks-via-Sequential-Quadratic-Programming\checkpoints\smallcnn_regular\model-nn-epoch10.pt',
+                    default='Adversarial-attacks-via-Sequential-Quadratic-Programming/checkpoints/smallcnn_regular/model-nn-epoch10.pt',
                     help='model for white-box attack evaluation')
-parser.add_argument('--data-attak-path',
+parser.add_argument('--data-attack-path',
                     default='Adversarial-attacks-via-Sequential-Quadratic-Programming/data_attack/mnist_X_adv.npy',
                     help='adversarial data for white-box attack evaluation')
 parser.add_argument('--data-path',
-                    default=r'C:\Users\edoar\Desktop\PythonProjects\data\mnist_X.npy',
+                    default='C:/Users/edoar/Desktop/PythonProjects/data/mnist_X.npy',
                     help='data for white-box attack evaluation')
 parser.add_argument('--target-path',
-                    default=r'C:\Users\edoar\Desktop\PythonProjects\data\mnist_Y.npy',
+                    default='C:/Users/edoar/Desktop/PythonProjects/data/mnist_Y.npy',
                     help='target for white-box attack evaluation')
 
 args = parser.parse_args()
@@ -116,7 +116,7 @@ def main():
     np.save('data/mnist_Y.npy', test_labels_to_save)
     
     # load data
-    X_adv_data = np.load(args.data_attak_path)
+    X_adv_data = np.load(args.data_attack_path)
     X_data = np.load(args.data_path)
     Y_data = np.load(args.target_path)
 

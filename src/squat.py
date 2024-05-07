@@ -23,12 +23,14 @@ model.load_state_dict(torch.load(f"{os.path.abspath(os.path.join(os.path.dirname
 
 d = cp.Variable(28*28) # direction (variable of the optimization problem)
 I = torch.eye(28*28) # identity matrix
+d_lambda = cp.Variable(28*28)
+lambda_k = torch.zeros(10)  # Initialize Lagrange multipliers
 
 def squat_algorithm(x, xk):
     utility_functions.show_image(xk, title="x0")
+
     for k in range (0, config.N_iter):
         
-        lambda_k = torch.zeros(utility_functions.g(xk).shape, device=x.device)  # Initialize Lagrange multipliers
         f_gradient = utility_functions.compute_f_gradient(x, xk)
         
         # FIRST ORDER
@@ -81,50 +83,47 @@ def squat_algorithm(x, xk):
             # print(f"Model prediction for x_{k+1}: {model(xk.reshape(1,28,28))}")
             print(f"Model prediction for x_{k+1}: {torch.argmax(model(xk.reshape(1,28,28)))}")
             
-            # if torch.argmax(model(xk.reshape(1,28,28))) == config.j:
-            #     print("SmallCNN has been corrupted")
-            #     utility_functions.show_image(xk)
-            #     break
-
+            if torch.argmax(model(xk.reshape(1,28,28))) == config.j:
+                print("SmallCNN has been corrupted")
+                utility_functions.show_image(xk)
+                k = config.N_1+1
+        
+        # SECOND ORDER
+        
         if k>config.N_1:
-            # # SECOND ORDER
-            # lagrangian =    
-            # hessian_lagrangian = torch.autograd.functional.hessian(lagrangian, xk, create_graph=False, strict=False, vectorize=False, strategy='reverse-mode')
-            # objective = cp.Minimize(f_gradient.t()@d + 0.5 * cp.quad_form(d, hessian_lagrangian))
-
+           
             lagrangian = utility_functions.compute_lagrangian(x, xk, lambda_k)
-            hessian_lagrangian = torch.autograd.functional.hessian(utility_functions.compute_lagrangian, (xk, lambda_k), create_graph=False)
-            print(hessian_lagrangian.shape)
+            print(f"lagrangian.shape: {lagrangian.shape}")
+            hessian_lagrangian = torch.autograd.functional.hessian(utility_functions.compute_lagrangian, (x.flatten(), xk.flatten(), lambda_k), create_graph=False)
+            
             # Ensure the Hessian is a numpy array to use in CVXPY
-            hessian_lagrangian_np = hessian_lagrangian[0][0].detach().numpy()
+            # hessian_lagrangian_np = hessian_lagrangian[0][0].detach().numpy()
             
-            # f_gradient = utility_functions.compute_f_gradient(x, xk).detach().numpy()
-            # d = cp.Variable(xk.numel())  # direction (variable of the optimization problem)
-            
-            objective = cp.Minimize(f_gradient.T @ d + 0.5 * cp.quad_form(d, hessian_lagrangian_np))
+            objective = cp.Minimize(f_gradient.T @ d + 0.5 * cp.quad_form(d_lambda, hessian_lagrangian))
             g_val = utility_functions.g(xk).detach().numpy()
             jacobian = torch.autograd.functional.jacobian(utility_functions.g, xk).detach().numpy()
             
             # Define constraints (assuming jacobian is correctly computed)
-            constraints = [jacobian.T @ d + g_val <= 0]
+            # constraints = [jacobian.T @ d + g_val <= 0]
+            constraints = [cp.matmul(jacobian,d) + g_val <= 0]
             
             # Solve the quadratic problem
             problem = cp.Problem(objective, constraints)
             result = problem.solve()
-            optimal_d = d.value
+            d_x = d.value
+            d_λ = d_lambda.value
             
-            # Update xk based on the direction found
-            xk = torch.from_numpy(xk.detach().numpy().flatten() + optimal_d).view_as(xk)
+            # Update:  xk+1 ← xk + βdx
+            xk = xk.detach().numpy().flatten() + config.beta * d_x
+            # xk = torch.from_numpy(xk.detach().numpy().flatten() + optimal_d).view_as(xk)
             
-            # Update lambda_k based on some dual update rule (not explicitly defined here)
-            lambda_k = config.alpha_dual * torch.from_numpy(g_val)  # Update rule for lambda_k needs to be defined appropriately
+            # Update: λ_k+1 ← β*d_λ
+            lambda_k = config.beta * d_λ
 
             # utility_functions.plot_tensor(xk, f"x_{k+1}", dim=2)
             utility_functions.show_image(xk)
             print(f"Model prediction for x_{k+1}: {torch.argmax(model(xk.reshape(1,28,28)))}")
                 
-            # SECOND ORDER
-            # torch.autograd.functional.hessian or torch.autograd.functional.jacobian
-    utility_functions.show_image(xk)
+    utility_functions.show_image(xk, title=f"x_{k}")
 
     
