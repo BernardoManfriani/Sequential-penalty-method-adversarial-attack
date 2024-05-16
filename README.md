@@ -5,6 +5,7 @@ Implementation of the **SQUAT** Algorithm. (Théo Beuzeville, Alfredo Buttari, S
 ## Prerequisites
 ```
 $ pip install -r requirements.txt
+$ pip install git+https://github.com/jeromerony/adversarial-library
 ```
 
 ## Train Robust SmallCNN
