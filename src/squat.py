@@ -39,7 +39,7 @@ def squat_algorithm(x, x_k):
             g_grad = torch.autograd.functional.jacobian(utils.g, x_k.flatten(), create_graph=False, strict=False, vectorize=False, strategy='reverse-mode')
             constraints = [g_grad.numpy() @ d + g <= 0]
             
-            ''' PROVO A NON DEFINIRE g_val (non funzia)'''
+            ''' PROVO A NON DEFINIRE g come variabile cp (non funzia)'''
             # g_grad = torch.autograd.functional.jacobian(utils.g, x_k.flatten(), create_graph=False, strict=False, vectorize=False, strategy='reverse-mode')
             # g = utils.g(x_k).numpy()
             # constraints = [g_grad.numpy().T @ d + g <= 0] # sul paper: g = g_grad.T @ d + g <= 0
