@@ -1,17 +1,14 @@
-from src import data_preparation, model_definition, evaluation, utility_functions, squat
-import torch
-from models.small_cnn import SmallCNN
+from src import data_preparation, model_definition, evaluation, utils, squat
+import torch 
 
 def main():
     dataset = data_preparation.load_dataset()
-    a = utility_functions.get_random_image(1, dataset)
-    b = utility_functions.get_random_image(5, dataset)
-    #utility_functions.show_image(a)
+    a = utils.get_random_image(1, dataset, seed=111) 
+    b = utils.get_random_image(5, dataset, seed=111)
     x = a.clone()
-    xk = b.clone()
-    # start_time = time.time()
-    # print("Start")
-    squat.squat_algorithm(x, xk)
+    x_k = b.clone()
+    # x_k = torch.rand((1,28,28)) 
+    squat.squat_algorithm(x, x_k)
     
     # model = model_definition.define_model()
     # training.train_model(model)
