@@ -37,4 +37,3 @@ print(f"Prediction: {torch.argmax(model(mnist_X_adv[0]))}")
 
 mnist_X_adv_array = mnist_X_adv.numpy()
 np.save('Adversarial-attacks-via-Sequential-Quadratic-Programming/data_attack/carlini/mnist_X_adv.npy', mnist_X_adv_array)
-

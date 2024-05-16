@@ -3,6 +3,7 @@ import torch
 import os
 import sys
 import numpy as np
+import cv2
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
@@ -36,5 +37,13 @@ utility_functions.show_image(mnist_X_adv[0])
 print(f"Prediction: {torch.argmax(model(mnist_X_adv[0]))}")
 
 mnist_X_adv_array = mnist_X_adv.numpy()
-np.save('Adversarial-attacks-via-Sequential-Quadratic-Programming/data_attack/alma/mnist_X_adv.npy', mnist_X_adv_array)
 
+# np.save('Adversarial-attacks-via-Sequential-Quadratic-Programming/data_attack/alma/mnist_X_adv.npy', mnist_X_adv_array)
+np.save(f"{os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))}/data_attack/alma/mnist_X_adv.npy", mnist_X_adv_array)
+
+# image_array = np.load(f"{os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))}/data_attack/alma/mnist_X_adv.npy")
+
+# image_normalized = (image_array * 255).astype(np.uint8)
+
+# # Salva l'immagine come file PNG utilizzando OpenCV
+# cv2.imwrite('immagine.png', image_normalized)
