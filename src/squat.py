@@ -1,104 +1,102 @@
 import torch
 import os
 import sys
+import numpy as np
+import cvxpy as cp
+from cvxpy import OSQP
+
+# Add project root to the system path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-import cvxpy as cp
 from src import utils
 from models.small_cnn import SmallCNN
 import config
 
-if torch.cuda.is_available():
-    print("GPU is available")
-    device = "cuda"
-else:
-    print("GPU is not available.")
-    device = "cpu"
+# Check for GPU availability
+device = "cuda" if torch.cuda.is_available() else "cpu"
+print(f"GPU is {'available' if device == 'cuda' else 'not available'}.")
 
+# Load the model
 model = SmallCNN()
-model.load_state_dict(torch.load(f"{os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))}/checkpoints/smallcnn_regular/model-nn-epoch10.pt", map_location=torch.device(device)))
+model.load_state_dict(torch.load(
+    os.path.join(os.path.dirname(__file__), '..', 'checkpoints', 'smallcnn_regular', 'model-nn-epoch10.pt'),
+    map_location=torch.device(device)
+))
 
 def squat_algorithm(x, x_k):
-    
-    d = cp.Variable(28*28) # direction (variable of the optimization problem)
-    λ_k = torch.zeros(10, requires_grad=True)  # initialize Lagrange multipliers
+    n = 28 * 28
+    d = cp.Variable(n)  # direction (variable of the optimization problem)
+    λ_k = np.zeros(10)  # initialize Lagrange multipliers
     utils.show_image(x_k, title="x0")
-    I = torch.eye(28*28)
+    I = torch.eye(n)
     
-    for k in range (0,   config.N_iter):
-
+    for k in range(config.N_iter):
         # FIRST ORDER
-        if k<=config.N_1:
-            
+        if k < config.N_1:
             f_grad = utils.f_gradient(x, x_k)
-            objective = cp.Minimize(f_grad.numpy().T @ d + 0.5 * cp.norm(d)**2 )  # cp.quad_form(d,I)==cp.norm(d)**2
-
-            # CONSTRAINTS
-            ''' PARTE CHE NON MI TORNA'''
-            g = cp.Variable(utils.g(x_k).shape, value=utils.g(x_k).numpy())
-            g_grad = torch.autograd.functional.jacobian(utils.g, x_k.flatten(), create_graph=False, strict=False, vectorize=False, strategy='reverse-mode')
-            constraints = [g_grad.numpy() @ d + g <= 0]
-            
-            ''' PROVO A NON DEFINIRE g come variabile cp (non funzia)'''
-            # g_grad = torch.autograd.functional.jacobian(utils.g, x_k.flatten(), create_graph=False, strict=False, vectorize=False, strategy='reverse-mode')
-            # g = utils.g(x_k).numpy()
-            # constraints = [g_grad.numpy().T @ d + g <= 0] # sul paper: g = g_grad.T @ d + g <= 0
-            
-            # QP SUB-PROBLEM
-            problem = cp.Problem(objective, constraints) 
-            problem.solve(verbose=True) # a default usa il solver ECOS 
-            optimal_d = d.value
-            # print(f"d.value: {d.value}")
-
-            # UPDATE
-            x_k = x_k.flatten() + (config.α * optimal_d)
-            x_k.data = x_k.data.clamp(min=0.0, max=1.0) # porta i valori negativi a 0 e i maggiori di 1 a 1
-            x_k = x_k.reshape(28,28)
-            x_k = x_k.to(torch.float32)
-                
-            # utils.show_image(x_k, title=f"x{k+1}")
-            utils.plot_tensor(x_k, title=f"x{k+1}")
-            
-            print(f"Model prediction for x_{k+1}: {torch.argmax(model(x_k.reshape(1,28,28)))}")
-            
-            if torch.argmax(model(x_k.reshape(1,28,28))) == config.j:
-                print("SmallCNN has been corrupted")
-        
-        # SECOND ORDER
-        
-        if k>config.N_1:
-            
-            L = utils.Lagrangian(x, x_k, λ_k)
-            L_hessian = torch.autograd.functional.hessian(utils.Lagrangian, (x, x_k, λ_k))
-            objective = cp.Minimize(f_grad.numpy().T @ d + 0.5 * cp.quad_form(d, L_hessian))
+            objective = cp.Minimize(cp.matmul(f_grad.t(), d) + 0.5 * cp.quad_form(d, I))
             
             # CONSTRAINTS
-            ''' PARTE CHE NON MI TORNA '''
             g = cp.Variable(utils.g(x_k).shape, value=utils.g(x_k).numpy())
-            g_grad = torch.autograd.functional.jacobian(utils.g, x_k.flatten(), create_graph=False, strict=False, vectorize=False, strategy='reverse-mode')
-            constraints = [g_grad.numpy() @ d + g <= 0]
-            
-            ''' NON FUNZIA '''
-            # g = utils.g(x_k).numpy()
-            # g_grad = torch.autograd.functional.jacobian(utils.g, x_k.flatten(), create_graph=False, strict=False, vectorize=False, strategy='reverse-mode')
-            # constraints = [g_grad.numpy().T @ d + g <= 0]
+            g_grad = torch.autograd.functional.jacobian(utils.g, x_k.flatten()).numpy()
+            constraints = [g_grad @ d <= -g]  # Ensuring constraints are correctly defined
             
             # QP SUB-PROBLEM
             problem = cp.Problem(objective, constraints)
-            problem.solve()
-            d_x = d.value
-            d_λ = problem.constraints.dual_value
+            result = problem.solve(solver=cp.OSQP, verbose=False)
+            optimal_d = d.value
             
-            # Update:  x_k+1 ← x_k + βdx
-            x_k = x_k.numpy().flatten() + config.β * d_x
+            # UPDATE
+            x_k = x_k.flatten() + (config.α * optimal_d)
+            x_k = x_k.clamp(min=0.0, max=1.0).reshape(28, 28).to(torch.float32)
             
-            # Update: λ_k+1 ← β*d_λ
-            λ_k = config.β * d_λ
-
-            # utils.plot_tensor(x_k, f"x_{k+1}")
-            utils.show_image(x_k)
-            print(f"Model prediction for x_{k+1}: {torch.argmax(model(x_k.reshape(1,28,28)))}")
-                
+            utils.show_image(x_k, title=f"x{k+1}")
+            print(f"||x - x_k||: {torch.norm(x.flatten() - x_k.flatten(), p='fro')}")
+            
+            logits = model(x_k.unsqueeze(0))
+            print(f"logits: {logits.detach().numpy()}")
+            print(f"Model prediction for x_{k+1}: {torch.argmax(logits)}")
+            
+            if torch.argmax(logits) == config.j:
+                print("SmallCNN has been corrupted")
+        
+        # SECOND ORDER
+        else:
+            f_grad = utils.f_gradient(x, x_k)
+            
+            ''' PRIMO MODO '''
+            L_hessian = torch.autograd.functional.hessian(utils.lagrangian, inputs=(x, x_k, torch.from_numpy(λ_k)))[0][0]
+            L_hessian = L_hessian.view(784, 784)
+            
+            ''' SECONDO MODO '''
+            # def wrapped_function(x_k):
+            #     return utils.lagrangian(x, x_k, λ_k)
+            # L_hessian = torch.autograd.functional.hessian(wrapped_function, x_k.flatten()) # (784, 784)
+            
+            objective = cp.Minimize(f_grad.numpy().T @ d + 0.5 * cp.quad_form(d, L_hessian))
+            
+            # CONSTRAINTS
+            g = cp.Variable(utils.g(x_k).shape, value=utils.g(x_k).numpy())
+            g_grad = torch.autograd.functional.jacobian(utils.g, x_k.flatten()).numpy()
+            constraints = [g_grad @ d + g <= 0]
+            
+            # QP SUB-PROBLEM
+            problem = cp.Problem(objective, constraints)
+            result = problem.solve()
+            d_x = d.value # problem solution
+            d_λ = constraints[0].dual_value ; print(f"d_λ: {d_λ}") # lagrangian multipliers
+            
+            # Update x_k and λ_k
+            x_k = x_k.flatten() + config.β * d_x
+            x_k = x_k.clamp(min=0.0, max=1.0).reshape(28, 28).to(torch.float32)
+            λ_k = config.β * d_λ ; print(f"λ_k: {λ_k}")
+            
+            utils.show_image(x_k, title=f"Second order x{k+1}")
+            print(f"||x - x_k||: {torch.norm(x.flatten() - x_k.flatten(), p='fro')}")
+            
+            logits = model(x_k.unsqueeze(0))
+            print(f"logits: {logits.detach().numpy()}")
+            print(f"Model prediction for x_{k+1}: {torch.argmax(logits)}")
+    
     utils.show_image(x_k, title=f"x_{k}")
 
-    

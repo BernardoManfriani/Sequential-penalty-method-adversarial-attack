@@ -70,9 +70,10 @@ def f_gradient(x, x_k):
   f_grad = x_k - x # (x-x_k)*(-1)
   return f_grad
 
-def Lagrangian(x, x_k, λ_k):
-    x = x.flatten()
-    x_k = x_k.flatten()
-    L = ((1/2)*torch.norm(x - x_k, p='fro')**2) + λ_k.t()@g(x_k)
-    print(f"lagrangian: {L}")
-    return L
+def lagrangian(x, x_k, λ_k):
+  x = x.flatten()
+  x_k = x_k.flatten()
+  # λ_k = torch.tensor(λ_k, dtype=x.dtype) 
+  λ_k = torch.tensor(λ_k, dtype=x.dtype).clone().detach()
+  L = ((1/2)*torch.norm(x - x_k, p='fro')**2) + λ_k.t() @ g(x_k)
+  return L
