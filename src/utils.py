@@ -1,13 +1,8 @@
 
 import random
-from PIL import Image
-from torchvision import transforms
 import matplotlib.pyplot as plt
-import torchvision.datasets as dset
 import random
-import torch.nn.functional as F
 import torch
-import cvxpy as cp
 import sys
 import os
 import config
@@ -31,7 +26,7 @@ def get_random_image(target_class, dataset, seed=None):
 def show_image(image, title=""):
     plt.figure(figsize=(2, 2))
     plt.title(title)
-    plt.imshow(image.squeeze().numpy(), cmap='gray')  # Use grayscale colormap
+    plt.imshow(image.squeeze().numpy(), cmap='gray') 
     plt.axis('off')
     plt.show()
   
@@ -50,14 +45,6 @@ def plot_tensor(t, title=""):
     cv2.imshow(title, img_array)
     cv2.waitKey(200)
     cv2.destroyWindow(title)
-    
-def g(x_k):
-  I = torch.eye(config.classes) # identity matrix of size K
-  ones_vec = torch.ones(config.classes) # all ones vector of size K
-  canonical_vec = torch.zeros(config.classes) # canonical vector of size K
-  canonical_vec[config.j] = 1
-  g_val = torch.mv((I-(canonical_vec*ones_vec.t())), (model(x_k.reshape(1,28,28))).data.flatten())
-  return g_val
 
 def f(x, x_k):
   x = x.flatten()
@@ -65,10 +52,19 @@ def f(x, x_k):
   return (1/2)*torch.norm(x - x_k, p='fro')**2    
 
 def f_gradient(x, x_k):
-  x = x.flatten()
-  x_k = x_k.flatten()
-  f_grad = x_k - x # (x-x_k)*(-1)
-  return f_grad
+  return (x_k - x).flatten().cpu().numpy()
+
+      
+''' 
+g(xk) = (I_k - 1_K^T*e_j )*C(x_k)
+'''
+def g(x_k):
+  I = torch.eye(config.classes) # identity matrix of size K
+  ones_vec = torch.ones(config.classes) # all ones vector of size K
+  canonical_vec = torch.zeros(config.classes) # canonical vector of size K
+  canonical_vec[config.j] = 1
+  g_val = torch.mv((I-(canonical_vec*ones_vec.t())), (model(x_k.view(1, 1, 28, 28))).cpu().numpy())
+  return g_val
 
 def lagrangian(x, x_k, λ_k):
   x = x.flatten()
