@@ -1,14 +1,15 @@
 from src import data_preparation, model_definition, evaluation, utils, squat
-import torch 
+import config
 
 def main():
     dataset = data_preparation.load_dataset()
-    a = utils.get_random_image(1, dataset, seed=111) 
-    b = utils.get_random_image(5, dataset, seed=111)
-    x = a.clone()
-    x_k = b.clone()
-    # x_k = torch.rand((1,28,28)) 
-    squat.squat_algorithm(x, x_k)
+    x = utils.get_random_image(config.original_class, dataset, seed=111)
+    N_iter = config.N_iter
+    N_1 = config.N_1
+    α = config.α
+    β = config.β
+    
+    squat.SQUAT(x, N_iter, N_1, α, β)
     
     # model = model_definition.define_model()
     # training.train_model(model)
@@ -16,3 +17,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    
