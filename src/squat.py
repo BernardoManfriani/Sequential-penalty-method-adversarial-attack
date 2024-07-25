@@ -60,7 +60,7 @@ def SQUAT(x, x_j, j, N_iter, N_1, α, β):
       
     x_k = x_j
     
-    utils.show_image(x, title="x0")
+    utils.show_image(x, title="Image to attack")
     initial_logits = C(x)
     original_class = np.argmax(initial_logits)
     print(f"Classificazione iniziale: {original_class}")
@@ -95,11 +95,8 @@ def SQUAT(x, x_j, j, N_iter, N_1, α, β):
             print(f"xk.device: {x_k.device}")    
             
             '''g_grad con jacobiano'''
-            # g_grad = compute_g_gradient(x_k, j, K)
+            g_grad = compute_g_gradient(x_k, j, K)
 
-            # g_x_k = utils.g(x_k)
-            # g_grad = torch.autograd.functional.jacobian(utils.g, x_k).numpy() # (10, 784)
-            
             d = cp.Variable(n)  
             objective = cp.Minimize(f_grad.T @ d + 0.5 * cp.quad_form(d, np.eye(n))) # objective = cp.Minimize(cp.sum_squares(x_k.flatten()-x.flatten()+d))
             constraints = [g_grad @ d + g_x_k.flatten() <= 0] # (10, 784)@(784,) + (10)
@@ -119,8 +116,8 @@ def SQUAT(x, x_j, j, N_iter, N_1, α, β):
             
                 
             # UPDATE
-            # x_k = x_k + α * optimal_d.float().view(1, 28, 28)
-            x_k = x_k + α * optimal_d.float().view(1, 28, 28).clamp(0,1)
+            x_k = x_k + α * optimal_d.float().view(1, 28, 28)
+            # x_k = x_k + α * optimal_d.float().view(1, 28, 28).clamp(0,1)
             x_k = x_k.view(1, 28, 28).cpu()
             
             current_logits = C(x_k)
@@ -131,11 +128,20 @@ def SQUAT(x, x_j, j, N_iter, N_1, α, β):
             print(f"Model prediction for x_{k+1}: {np.argmax(current_logits)}")
             
             if config.verbose:
-                if (k+1) % 50 == 0:
+                if (k+1) ==1:
                     utils.show_image(x_k, f"Immagine perturbata (Iterazione {k+1})")
                     print(f"logits: {current_logits}")
                     print(f"||x - x_k||: {torch.norm(x.flatten() - x_k.flatten(), p='fro')}")
                     
+                if (k+1) ==5:
+                    utils.show_image(x_k, f"Immagine perturbata (Iterazione {k+1})")
+                    print(f"logits: {current_logits}")
+                    print(f"||x - x_k||: {torch.norm(x.flatten() - x_k.flatten(), p='fro')}")
+                if (k+1) ==50:
+                    utils.show_image(x_k, f"Immagine perturbata (Iterazione {k+1})")
+                    print(f"logits: {current_logits}")
+                    print(f"||x - x_k||: {torch.norm(x.flatten() - x_k.flatten(), p='fro')}")
+                        
                 if (k+1) % 50 == 0:
                     plt.figure(figsize=(10, 6))
                     plt.plot(iterations, target_logits, label=f'Classe target ({j})')
