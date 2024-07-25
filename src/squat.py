@@ -47,7 +47,7 @@ def compute_g_gradient(x_k, j, K):
 
 
 
-def SQUAT(image_to_attack, x_j, j, N_iter, N_1, α, β):
+def SQUAT(x, x_j, j, N_iter, N_1, α, β):
     # riceve un immagine appartente alla classe target (rimane costante)
     # aggiorna xk che all'inizio è un numero diverso dalla classe target
     n = 28 * 28
@@ -58,8 +58,7 @@ def SQUAT(image_to_attack, x_j, j, N_iter, N_1, α, β):
     iterations = []
     norms = []
       
-    x = image_to_attack # es 7
-    x_k = x_j # es 1
+    x_k = x_j
     
     utils.show_image(x, title="x0")
     initial_logits = C(x)
@@ -113,8 +112,8 @@ def SQUAT(image_to_attack, x_j, j, N_iter, N_1, α, β):
             if d.value is None:
                 optimal_d = torch.rand(n)
             else:    
-                optimal_d = torch.from_numpy(d.value).clamp(0,1).cpu()
-                # optimal_d = torch.from_numpy(d.value).cpu()
+                # optimal_d = torch.from_numpy(d.value).clamp(0,1).cpu()
+                optimal_d = torch.from_numpy(d.value).cpu()
             
             # print(optimal_d)
             
