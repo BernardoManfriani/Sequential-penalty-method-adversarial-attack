@@ -85,6 +85,12 @@ def SQUAT(x, x_j, j, N_iter, N_1, α, β):
             ''' g_grad con differenze finite  (g'(xk) i-esima = g(x_k+e_i*epsilon)-g(x_k)/epsilon) '''
             g_grad = np.zeros((K, 784)) 
             epsilon = 1e-5
+<<<<<<< Updated upstream
+=======
+            
+            #differenze finite per calcolare il gradiente di g
+            ''' g'(xk) i-esima = g(x_k+e_i*epsilon)-g(x_k)/epsilon '''
+>>>>>>> Stashed changes
             for i in range(784):
                 x_plus = x_k.clone()
                 x_plus.flatten()[i] += epsilon
