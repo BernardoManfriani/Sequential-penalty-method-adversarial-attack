@@ -48,7 +48,7 @@ This will train the model for 10 epochs and save the weights in `checkpoints/` d
 To run adversarial attacks using the Sequential Penalty Method, execute the following command:
 
 ```bash
-python attack.py
+python squat-penalty-attack.py  --true-label 5 --target-label 1
 ```
 
 The results are saved in the `results/` directory.
