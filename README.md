@@ -1,4 +1,4 @@
-# Adversarial Attacks via Sequential Quadratic Programming
+# Sequentaial penalty method adversarial attack
 
 Implementation of the **SQUAT** Algorithm. (Théo Beuzeville, Alfredo Buttari, Serge Gratton, Theo Mary, Erkan Ulker. Adversarial Attacks via Sequential Quadratic Programming. 2022.)
 
