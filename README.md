@@ -47,6 +47,10 @@ The MNIST dataset is a collection of 70,000 grayscale images of handwritten digi
 The SmallCNN model consists of two convolutional layers followed by ReLU activations, then a max pooling layer, followed by two more convolutional layers with ReLU activations, another max pooling layer, and finally three fully connected layers for classification.
 
 The model was trained using the Adam optimizer (learning rate of 0.001) with cross-entropy loss, achieving high accuracy on non-perturbed images.
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/c9f760b9-4aab-45e4-96c0-6deed39e8961" width="400" alt="Train Loss" title="Train Loss"/> 
+  <img src="https://github.com/user-attachments/assets/cc7cafaf-6cf1-4f4f-86b8-234e933faae4" width="400" alt="Train Accuracy" title="Train Accuracy"/>
+</p> 
 
 ## Sequential Penalty Methods
 The Sequential Penalty Method consists of starting from the constrained problem:
@@ -114,11 +118,14 @@ Several experiments were conducted to assess the effectiveness of the Sequential
 AGGIUNGI COMMENTO
 
 - **Different Learning Rates**:  We tested different values for the learning rate of the Adam optimizer.
- <p align="center">
+ * **lr=0.1**
+  <p align="center">
   <img src="https://github.com/user-attachments/assets/f402117f-3441-4310-a5bf-1c1b94d5875f" width="800" alt="From 8 to 1, tau0=1, rho=1.1" title="From 8 to 1, tau0=1, rho=1.5, lr=0.1"/> 
 </p> 
- <p align="center">
-  <img src="https://github.com/user-attachments/assets/ecf9fcbc-a102-4ce9-8c75-7e539cefb623" width="800" alt="From 8 to 1, tau0=1, rho=1.5" title="From 8 to 1, tau0=1, rho=1.5, lr=0.01"/> 
+
+ * **lr=0.01**
+<p align="center">
+<img src="https://github.com/user-attachments/assets/ecf9fcbc-a102-4ce9-8c75-7e539cefb623" width="800" alt="From 8 to 1, tau0=1, rho=1.5" title="From 8 to 1, tau0=1, rho=1.5, lr=0.01"/> 
 </p> 
 
 | tau  | rho  | lr | iterations |
@@ -126,8 +133,20 @@ AGGIUNGI COMMENTO
 | 1.0  | 1.5  | 0.1 |      9      |
 | 1.0  | 1.5  | 0.01 |      52      |
 
-- **Different Optimizer**: we compared Adam, SGD, 
+- **Different Optimizer**: we compared Adam, SGD, LBFGS
+* **ADAM**
+<p align="center">
+<img src="https://github.com/user-attachments/assets/ecf9fcbc-a102-4ce9-8c75-7e539cefb623" width="800" alt="From 8 to 1, tau0=1, rho=1.5" title="From 8 to 1, tau0=1, rho=1.5, lr=0.01"/> 
+</p> 
 
+  
+* **SGD**
+<p align="center">
+<img src="https://github.com/user-attachments/assets/8a785f5d-28ef-43fa-b841-3aea544e58aa" width="800" alt="From 5 to 4, SGD, lr=0.01, momentum=0.8" title="From 5 to 4, SGD, lr=0.01, momentum=0.8"/> 
+</p> 
+
+commento dicendo che sgd non sembra essere adatto per la risolizine di questo problema a differenza di adam che è 
+  
 ## Usage
 
 ### Training the Model
