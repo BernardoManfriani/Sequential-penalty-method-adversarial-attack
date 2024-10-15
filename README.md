@@ -87,7 +87,10 @@ Several experiments were conducted to assess the effectiveness of the Sequential
 | 1.0  | 1.1  | 51       |
 | 1.0  | 1.5  | 50        |
 
-DA RIVEDERE: SE L INCREMENTO é TROPPO GRANDE NON FUNZIONA.
+- **Different Learning Rates**:  We tested different values for the learning rate of the Adam optimizer.
+ <p align="center">
+  <img src="https://github.com/user-attachments/assets/f402117f-3441-4310-a5bf-1c1b94d5875f" width="800" alt="From 8 to 1, tau0=1, rho=1.1" title="From 8 to 1, tau0=1, rho=1.5, lr=0.1"/> 
+</p> 
 
 ## Usage
 
