@@ -1,20 +1,35 @@
 ## Overview
 
-This repository contains the implementation of adversarial attacks on the MNIST dataset using.
-  
+This repository contains the implementation of adversarial attacks on the MNIST dataset using the Sequential Penalty Method (SPM). The approach focuses on generating adversarial examples that force a classifier to misclassify an image by introducing minimal perturbations, ensuring the changes are imperceptible to humans while still deceiving the machine learning model.
 
 ## Introduction
 
-Adversarial attacks are techniques used to deceive machine learning models by introducing small, carefully crafted perturbations to the input data. These perturbations are generally imperceptible to humans but can cause a model to make incorrect predictions...….
+Adversarial attacks are techniques used to deceive machine learning models by introducing small, carefully crafted perturbations to the input data. These perturbations are generally imperceptible to humans but can cause a model to make incorrect predictions. In this project, we implement a **Sequential Penalty Method** to carry out adversarial attacks on images from the MNIST dataset.
+
+The **Sequential Penalty Method (SPM)** transforms a constrained optimization problem into a series of unconstrained subproblems by introducing a penalty function. At each iteration, the penalty parameter is increased to enforce constraint satisfaction while minimizing the objective function. This method ensures that the adversarial perturbation remains small while still achieving misclassification.
+
+### Problem Formulation
+
+The constrained optimization problem is defined as follows:
+
+
+$$\min f(x) \quad \text{s.t.} \quad g(x) \leq 0 $$
+
+Where:
+
+- $ f(x) = \frac{1}{2} \|x - x_k\|^2$ : This objective function minimizes the difference between the perturbed image $x$ and the original image $x_k$.
+
+- $g(x) = (I_k - 1^T_k \cdot e_j) \cdot C(x_k) $: This inequality constraint ensures that the classifier misclassifies the perturbed image into the target class $j $. Here, $C(x_k) $ represents the classifier's prediction output, and $e_j $ is the target class vector.
+
+The penalty function $P(x) = \max(0, g(x))^2 $ is applied iteratively, and the penalty parameter $\tau $ is increased over time to force the solution towards satisfying the constraints while minimizing $f(x) $.
+
+
 
 ## Requirements
 
-To run this project, you will need the following dependencies:
+Requirements
 
-- cose
-- cose
-
-You can install all the required libraries using:
+To run this project, you will need to install all the requirements with following command.
 
 ```bash
 pip install -r requirements.txt
@@ -22,7 +37,13 @@ pip install -r requirements.txt
 
 ## Model and Dataset
 
-The adversarial attacks are performed on images from the MNIST dataset. The model used is a Small Convolutional Neural Network (SmallCNN) trained for 20 epochs, achieving 99% accuracy on non-perturbed images. The architecture and training details can be found in the `models/smallcnn.py` file.
+TThe adversarial attacks are performed on images from the MNIST dataset. The model used is a Small Convolutional Neural Network (SmallCNN) trained for 10 epochs, achieving 99% accuracy on non-perturbed images. The architecture and training details can be found in the models/smallcnn.py file.
+
+The MNIST dataset is a collection of 70,000 grayscale images of handwritten digits (0-9), each of size 28x28 pixels, split into 60,000 training images and 10,000 test images.
+
+The SmallCNN model consists of two convolutional layers followed by ReLU activations, then a max pooling layer, followed by two more convolutional layers with ReLU activations, another max pooling layer, and finally three fully connected layers for classification.
+
+The model was trained using the Adam optimizer (learning rate of 0.001) with cross-entropy loss, achieving high accuracy on non-perturbed images.
 
 ## Sequential Penalty Methods
 The Sequential Penalty Method consists of starting from the constrained problem:
