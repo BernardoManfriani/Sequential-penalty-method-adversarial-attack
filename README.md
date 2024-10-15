@@ -37,7 +37,10 @@ pip install -r requirements.txt
 
 ## Model and Dataset
 
-TThe adversarial attacks are performed on images from the MNIST dataset. The model used is a Small Convolutional Neural Network (SmallCNN) trained for 10 epochs, achieving 99% accuracy on non-perturbed images. The architecture and training details can be found in the models/smallcnn.py file.
+The adversarial attacks are performed on images from the MNIST dataset. The model used is a Small Convolutional Neural Network (SmallCNN) trained for 10 epochs, achieving 99% accuracy on non-perturbed images. The architecture and training details can be found in the models/smallcnn.py file.
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/203e432f-21fe-4cb5-9728-374c5338b3cf" width="300" alt="SmallCNN" title="SmallCNN"/> 
+</p> 
 
 The MNIST dataset is a collection of 70,000 grayscale images of handwritten digits (0-9), each of size 28x28 pixels, split into 60,000 training images and 10,000 test images.
 
@@ -95,7 +98,7 @@ Several experiments were conducted to assess the effectiveness of the Sequential
   <img src="https://github.com/user-attachments/assets/351b730e-c42c-4fc2-a91e-201fc00a5d2f" width="800" alt="From 3 to 0" title="From 3 to 0"/> 
 </p> 
 
-- **Tau Values**: We tested different values for the hyperparameter tau to analyze its impact on the perturbation magnitude and misclassification rate. The results showed that smaller tau values resulted in smaller perturbations but required more iterations to achieve the target misclassification.
+- **Tau Values**: We tested different values for the hyperparameter tau to analyze its impact on the perturbation magnitude and misclassification rate. 
 <p align="center">
   <img src="https://github.com/user-attachments/assets/c8987a5e-6e5e-4347-8aa3-6e88abe2db76" width="800" alt="From 8 to 1, tau0=1, rho=1.1" title="From 8 to 1, tau0=1, rho=1.2"/> 
 </p> 
@@ -108,10 +111,22 @@ Several experiments were conducted to assess the effectiveness of the Sequential
 | 1.0  | 1.1  | 51       |
 | 1.0  | 1.5  | 50        |
 
+AGGIUNGI COMMENTO
+
 - **Different Learning Rates**:  We tested different values for the learning rate of the Adam optimizer.
  <p align="center">
   <img src="https://github.com/user-attachments/assets/f402117f-3441-4310-a5bf-1c1b94d5875f" width="800" alt="From 8 to 1, tau0=1, rho=1.1" title="From 8 to 1, tau0=1, rho=1.5, lr=0.1"/> 
 </p> 
+ <p align="center">
+  <img src="https://github.com/user-attachments/assets/ecf9fcbc-a102-4ce9-8c75-7e539cefb623" width="800" alt="From 8 to 1, tau0=1, rho=1.5" title="From 8 to 1, tau0=1, rho=1.5, lr=0.01"/> 
+</p> 
+
+| tau  | rho  | lr | iterations |
+|------|------|----|------------|
+| 1.0  | 1.5  | 0.1 |      9      |
+| 1.0  | 1.5  | 0.01 |      52      |
+
+- **Different Optimizer**: we compared Andam, SGD, 
 
 ## Usage
 
