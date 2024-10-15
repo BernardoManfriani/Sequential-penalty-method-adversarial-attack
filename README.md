@@ -76,11 +76,18 @@ Several experiments were conducted to assess the effectiveness of the Sequential
 
 - **Tau Values**: We tested different values for the hyperparameter tau to analyze its impact on the perturbation magnitude and misclassification rate. The results showed that smaller tau values resulted in smaller perturbations but required more iterations to achieve the target misclassification.
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/cbe81d1b-995d-4142-a349-5c097b97d6aa" width="800" alt="From 2 to 6, tau0=1, rho=1.2" title="From 2 to 6, tau0=1, rho=1.2"/> 
+  <img src="https://github.com/user-attachments/assets/c8987a5e-6e5e-4347-8aa3-6e88abe2db76" width="800" alt="From 8 to 1, tau0=1, rho=1.1" title="From 8 to 1, tau0=1, rho=1.2"/> 
 </p> 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/cbe81d1b-995d-4142-a349-5c097b97d6aa" width="800" alt="From 2 to 6, tau0=1, rho=1.2" title="From 2 to 6, tau0=1, rho=1.5"/> 
+  <img src="https://github.com/user-attachments/assets/c8987a5e-6e5e-4347-8aa3-6e88abe2db76" width="800" alt="From 8 to 1, tau0=1, rho=1.5" title="From 8 to 1, tau0=1, rho=1.2"/> 
 </p> 
+
+| tau  | rho  | iterations |
+|------|------|------------|
+| 1.0  | 1.1  | 51       |
+| 1.0  | 1.5  | 50        |
+
+DA RIVEDERE: SE L INCREMENTO é TROPPO GRANDE NON FUNZIONA.
 
 ## Usage
 
