@@ -133,7 +133,7 @@ AGGIUNGI COMMENTO
 | 1.0  | 1.5  | 0.1 |      9      |
 | 1.0  | 1.5  | 0.01 |      52      |
 
-- **Different Optimizer**: we compared Adam, SGD, LBFGS
+- **Different Optimizer**: we compared Adam and SGD:
 * **ADAM**
 <p align="center">
 <img src="https://github.com/user-attachments/assets/ecf9fcbc-a102-4ce9-8c75-7e539cefb623" width="800" alt="From 8 to 1, tau0=1, rho=1.5" title="From 8 to 1, tau0=1, rho=1.5, lr=0.01"/> 
@@ -142,10 +142,8 @@ AGGIUNGI COMMENTO
   
 * **SGD**
 <p align="center">
-<img src="https://github.com/user-attachments/assets/8a785f5d-28ef-43fa-b841-3aea544e58aa" width="800" alt="From 5 to 4, SGD, lr=0.01, momentum=0.8" title="From 5 to 4, SGD, lr=0.01, momentum=0.8"/> 
+<img src="https://github.com/user-attachments/assets/86fe880d-21de-4d9a-863b-d5ab8644f06c" width="800" alt="From 8 to 1, SGD, lr=0.01" title="From 8 to 1, SGD, lr=0.01"/> 
 </p> 
-
-commento dicendo che sgd non sembra essere adatto per la risolizine di questo problema a differenza di adam che è 
   
 ## Usage
 
