@@ -59,7 +59,8 @@ P(x_k)=  \max\\{0,g(x_k)\\}^2
 $$
     
 The unconstrained subproblem to minimize becomes: 
-$$ \min_{x_k} \frac{1}{2} ||x-x_k||^2 + \tau \cdot \max\{0, (I_k - 1_K^T\cdot ej )\cdot C(x_k)\}^2 $$
+
+$$\min_{x_k} \frac{1}{2} ||x-x_k||^2 + \tau \cdot \max\{0, (I_k - 1_K^T\cdot ej )\cdot C(x_k)\}^2$$
 
 ## Experiments
 Several experiments were conducted to assess the effectiveness of the Sequential Penalty Method under different conditions:
