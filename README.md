@@ -126,7 +126,7 @@ AGGIUNGI COMMENTO
 | 1.0  | 1.5  | 0.1 |      9      |
 | 1.0  | 1.5  | 0.01 |      52      |
 
-- **Different Optimizer**: we compared Andam, SGD, 
+- **Different Optimizer**: we compared Adam, SGD, 
 
 ## Usage
 
