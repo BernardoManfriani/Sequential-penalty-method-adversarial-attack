@@ -11,6 +11,7 @@ from PIL import Image
 import os
 import re
 import argparse
+import numpy as np
 
 def natural_sort_key(s):
     return [int(c) if c.isdigit() else c.lower() for c in re.split(r'(\d+)', s)]
@@ -47,47 +48,50 @@ def create_gif_from_png(folder_path, output_path='output.gif', duration=500):
     print(f"GIF created and saved as {output_path}")
     return output_path
 
-def show(model, input_image, input_image_perturbed, perturbation, iterations, target_label, true_label):
+def show(model, input_image, input_image_perturbed, perturbation, iterations, target_label, true_label, tau=0.5):
     # Create a figure with four subplots in a single row
     fig, (ax1, ax2, ax3, ax4) = plt.subplots(1, 4, figsize=(20, 5))
-    
+
     # Original image
     ax1.imshow(input_image.detach().cpu().squeeze(), cmap='gray')
     ax1.set_title('Original Image')
     ax1.axis('off')
-    
+
     # Perturbed image
     ax2.imshow(input_image_perturbed.detach().cpu().squeeze(), cmap='gray')
     ax2.set_title(f'Perturbed Image after {iterations} iterations')
     ax2.axis('off')
-    
+
     # Perturbation
     perturbation_plot = ax3.imshow(perturbation.detach().cpu().squeeze(), cmap='RdBu', norm=plt.Normalize(vmin=-0.5, vmax=0.5))
-    ax3.set_title(f'Perturbation (target label: {target_label})')
+    ax3.set_title(f'Perturbation (target label: {target_label}, tau: {tau})')
     ax3.axis('off')
     fig.colorbar(perturbation_plot, ax=ax3, fraction=0.046, pad=0.04)
-    
+
     # Logits
     with torch.no_grad():
         original_logits = torch.sigmoid(model(input_image).cpu().squeeze())
-        perturbed_logits = torch.sigmoid(model(input_image_perturbed).cpu().squeeze()) 
-    
-    x = range(10)
-    ax4.plot(x, original_logits, 'b-', label='Original')
-    ax4.plot(x, perturbed_logits, 'r-', label='Perturbed')
-    ax4.set_title('Model Logits')
+        perturbed_logits = torch.sigmoid(model(input_image_perturbed).cpu().squeeze())
+
+    x = np.arange(10)
+    bar_width = 0.35
+    # Use ax4 from the original figure
+    ax4.bar(x - bar_width/2, original_logits, bar_width, label='Original', color='b')
+    ax4.bar(x + bar_width/2, perturbed_logits, bar_width, label='Perturbed', color='r')
+    ax4.set_title(f'Model Logits after {iterations} iterations')
     ax4.set_xlabel('Class')
     ax4.set_ylabel('Logit Value')
     ax4.legend()
     ax4.grid(True)
-    
-        
+
+    # Save the figure
     os.makedirs(f"results/from_{true_label}_to_{target_label}", exist_ok=True)
-    
+
     plt.tight_layout()
-    plt.savefig(f"results/from_{true_label}_to_{target_label}/{true_label}_to_{target_label}_{iterations}.png")
+    plt.savefig(f"results/from_{true_label}_to_{target_label}/{true_label}_to_{target_label}_{iterations}_{tau}.png")
     # plt.show()
-    plt.close(fig)  
+    plt.close(fig)
+
 
 def SQUAT_attack(model, input_image, target_label, true_label, Niter=200, tau=0.5):
     print("=> Attacking the input image")
@@ -133,7 +137,7 @@ def SQUAT_attack(model, input_image, target_label, true_label, Niter=200, tau=0.
         # Increase tau
         tau = tau * 1.5
     
-    return input_image_perturbed, perturbation, k
+    return input_image_perturbed, perturbation, k, tau
 
 def main():
     # Parse command line arguments
@@ -184,7 +188,7 @@ def main():
     model.eval()
 
     # Call the SQUAT attack (make sure it's implemented correctly)
-    input_image_perturbed, perturbation, iterations = SQUAT_attack(model, input_image, target_label,true_label, Niter=100, tau=0.5, )
+    input_image_perturbed, perturbation, iterations = SQUAT_attack(model, input_image, target_label,true_label, Niter=100, tau=0.5)
 
     show(model, input_image, input_image_perturbed, perturbation, iterations, target_label, true_label.item())
     plt.close('all')
