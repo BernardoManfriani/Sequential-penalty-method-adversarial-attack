@@ -48,9 +48,10 @@ The SmallCNN model consists of two convolutional layers followed by ReLU activat
 
 The model was trained using the Adam optimizer (learning rate of 0.001) with cross-entropy loss, achieving high accuracy on non-perturbed images.
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/c9f760b9-4aab-45e4-96c0-6deed39e8961" width="400" alt="Train Loss" title="Train Loss"/> 
-  <img src="https://github.com/user-attachments/assets/cc7cafaf-6cf1-4f4f-86b8-234e933faae4" width="400" alt="Train Accuracy" title="Train Accuracy"/>
+  <img src="https://github.com/user-attachments/assets/c468d977-696a-49e7-9293-c64fdbbf16df" width="400" alt="Train Loss" title="Train Loss"/> 
+  <img src="https://github.com/user-attachments/assets/d940f9bf-499a-4d4d-b083-743d27239aaf" width="400" alt="Train Accuracy" title="Train Accuracy"/>
 </p> 
+
 
 ## Sequential Penalty Methods
 The Sequential Penalty Method consists of starting from the constrained problem:
@@ -64,7 +65,7 @@ where $\tau$ is a penalty parameter that is increased at each iteration and $P(x
 
 As shown in the figure below, the higher the value of $\tau$, the greater the tendency of the solution of $F(x)$ to coincide with the solution of the original problem $f(x)$.
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/4fe9ed38-2760-46b2-b1d9-d077e4e5a766" width="500" alt="From 2 to 6, tau0=1, rho=1.2" title="From 2 to 6, tau0=1, rho=1.5"/> 
+  <img src="https://github.com/user-attachments/assets/4fe9ed38-2760-46b2-b1d9-d077e4e5a766" width="400" alt="From 2 to 6, tau0=1, rho=1.2" title="From 2 to 6, tau0=1, rho=1.5"/> 
 </p> 
 
 In our specific case we have:
