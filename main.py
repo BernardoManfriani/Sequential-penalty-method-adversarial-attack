@@ -9,9 +9,7 @@ import os
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Train a model on CIFAR-10")
-    parser.add_argument("--model", type=str, default="smallcnn", help="Model architecture to use")
-    parser.add_argument("--dataset", type=str, default="mnist", help="Dataset to work with (mnist, cifar)")
-    parser.add_argument("--epochs", type=int, default=3, help="Number of epochs to train")
+    parser.add_argument("--epochs", type=int, default=10, help="Number of epochs to train")
     parser.add_argument("--batch-size", type=int, default=128, help="Batch size for training")
     parser.add_argument("--lr", type=float, default=0.1, help="Learning rate")
     parser.add_argument("--momentum", type=float, default=0.9, help="Momentum for SGD")
@@ -43,29 +41,13 @@ def load_checkpoint(checkpoint_path, model, optimizer, scheduler):
         return 0, 0.0
 
 def get_dataloaders(dataset, batch_size, num_workers):
-    if dataset=="cifar":
-      transform = transforms.Compose([
-          transforms.RandomCrop(32, padding=4),
-          transforms.RandomHorizontalFlip(),
-          transforms.ToTensor(),
-          transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
-      ])
-      
-      full_dataset = datasets.CIFAR10(root='./data', train=True, download=True, transform=transform)
-      test_dataset = datasets.CIFAR10(root='./data', train=False, download=True, transform=transform)
-    elif dataset=="mnist":
-      transform = transforms.Compose([
-        transforms.ToTensor(),
-        transforms.Normalize((0.1307,), (0.3081,)),   
-      ])
+    transform = transforms.Compose([
+    transforms.ToTensor(),
+    transforms.Normalize((0.1307,), (0.3081,)),   
+    ])
 
-      full_dataset = datasets.MNIST(root='./data', train=True, download=True, transform=transform)
-      test_dataset = datasets.MNIST(root='./data', train=False, download=True, transform=transform)
-    
-    else:
-      from dataset import BinaryShapeDataset
-      full_dataset = BinaryShapeDataset()  
-      test_dataset = BinaryShapeDataset()  
+    full_dataset = datasets.MNIST(root='./data', train=True, download=True, transform=transform)
+    test_dataset = datasets.MNIST(root='./data', train=False, download=True, transform=transform)
       
     train_size = int(0.8 * len(full_dataset))
     val_size = len(full_dataset) - train_size
@@ -139,31 +121,16 @@ def main():
     
     if args.log:
         import wandb
-        wandb.init(project="lab1", name=f"{args.model}", config=args)
+        wandb.init(project="optm-proj", name=f"smallcnn", config=args)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"=> Using device: {device}")
 
 
     print("=> Creating model")
-    if args.model == "smallcnn":
-      from models.smallcnn import SmallCNN 
-      model = SmallCNN().to(device)
-
-    else: 
-      from torchvision.models import resnet18
-      model = resnet18().to(device)   
+    from models.smallcnn import SmallCNN 
+    model = SmallCNN().to(device)
       
-      if args.dataset == "mnist":
-        model.conv1 = nn.Conv2d(1, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
-        model.fc = nn.Linear(in_features=model.fc.in_features, out_features=10)
-      elif args.dataset == "cifar":
-        model.fc = nn.Linear(in_features=model.fc.in_features, out_features=10)
-      elif args.dataset == "tiny":
-        model.conv1 = nn.Conv2d(1, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
-        model.fc = nn.Linear(in_features=model.fc.in_features, out_features=2)
-
-
     if args.log:
         wandb.watch(model, log="all")
         
@@ -179,7 +146,7 @@ def main():
       start_epoch, best_val_acc = load_checkpoint(args.resume, model, optimizer, scheduler)
 
     print("=> Get dataloaders")
-    train_loader, val_loader, test_loader = get_dataloaders(args.dataset, args.batch_size, args.num_workers)
+    train_loader, val_loader, test_loader = get_dataloaders("mnist", args.batch_size, args.num_workers)
     
     os.makedirs(args.checkpoint_dir, exist_ok=True)
 
@@ -212,7 +179,7 @@ def main():
                 'best_val_acc': best_val_acc,
                 'optimizer': optimizer.state_dict(),
                 'scheduler': scheduler.state_dict(),
-            }, os.path.join(args.checkpoint_dir, f"{args.model}_{args.dataset}_best.pth"))
+            }, os.path.join(args.checkpoint_dir, f"smallcnn_mnist_best.pth"))
             print(f"New best model saved with validation accuracy: {best_val_acc:.2f}%")
         
         # Save regular checkpoint
@@ -222,12 +189,12 @@ def main():
             'best_val_acc': best_val_acc,
             'optimizer': optimizer.state_dict(),
             'scheduler': scheduler.state_dict(),
-        }, os.path.join(args.checkpoint_dir, f"{args.model}_{args.dataset}_checkpoint.pth"))
+        }, os.path.join(args.checkpoint_dir, f"smallcnn_mnist_checkpoint.pth"))
             
         scheduler.step()
     
     print("\n=> Final test")
-    checkpoint = torch.load(f"{args.checkpoint_dir}/{args.model}_{args.dataset}_best.pth", map_location=device, weights_only=True)
+    checkpoint = torch.load(f"{args.checkpoint_dir}/smallcnn_mnist_best.pth", map_location=device, weights_only=True)
     state_dict = checkpoint['state_dict']
     model.load_state_dict(state_dict)
     test_loss, test_acc = validate(model, test_loader, criterion, device, desc="Test")
