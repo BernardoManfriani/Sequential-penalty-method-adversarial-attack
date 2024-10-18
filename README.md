@@ -13,15 +13,15 @@ The **Sequential Penalty Method (SPM)** transforms a constrained optimization pr
 The constrained optimization problem is defined as follows:
 
 
-$$\min f(x) \quad \text{s.t.} \quad g(x) \leq 0 $$
+$$\min f(x) \quad \text{s.t.} \quad g(x) \leq 0$$
 
 Where:
 
-- $ f(x) = \frac{1}{2} \|x - x_k\|^2$ : This objective function minimizes the difference between the perturbed image $x$ and the original image $x_k$.
+- $f(x) = \frac{1}{2} \|x - x_k\|^2$ : This objective function minimizes the difference between the perturbed image $x$ and the original image $x_k$.
 
-- $g(x) = (I_k - 1^T_k \cdot e_j) \cdot C(x_k) $: This inequality constraint ensures that the classifier misclassifies the perturbed image into the target class $j $. Here, $C(x_k) $ represents the classifier's prediction output, and $e_j $ is the target class vector.
+- $g(x) = (I_k - 1^T_k \cdot e_j) \cdot C(x_k) $: This inequality constraint ensures that the classifier misclassifies the perturbed image into the target class $j$. Here, $C(x_k)$ represents the classifier's prediction output, and $e_j$ is the target class vector.
 
-The penalty function $P(x) = \max(0, g(x))^2 $ is applied iteratively, and the penalty parameter $\tau $ is increased over time to force the solution towards satisfying the constraints while minimizing $f(x) $.
+The penalty function $P(x) = \max\\{0, g(x)\\}^2$ is applied iteratively, and the penalty parameter $\tau$ is increased over time to force the solution towards satisfying the constraints while minimizing $f(x)$.
 
 
 
@@ -68,33 +68,67 @@ As shown in the figure below, the higher the value of $\tau$, the greater the te
   <img src="https://github.com/user-attachments/assets/4fe9ed38-2760-46b2-b1d9-d077e4e5a766" width="400" alt="From 2 to 6, tau0=1, rho=1.2" title="From 2 to 6, tau0=1, rho=1.5"/> 
 </p> 
 
-In our specific case we have:
-- **Target image**: $x$ 
-- **Image to perturb**: $x_k$
-- **Objective function**: $f(x_k) = \frac{1}{2} ||x-x_k||^2$
-- **Constraint function**: $g(x_k)= (I_k - 1_K^T\cdot ej )\cdot C(x_k)$
 
-We solve the original constrained problem:
+In our specific implementation, we have the following key components:
+
+1. **Perturbation**: Is what we're trying to optimize to create the adversarial example. It is inizialized as a tensor of zeros with the same shape as the input image. We want to compute gradients with respect to this variable during optimization that's why `requires_grad=True`.
+   ```python
+   perturbation = torch.zeros_like(input_image, requires_grad=True)
+   ```
+
+2. **Optimizer**: We use PyTorch's Adam optimizer to update the perturbation.
+   ```python
+   optimizer = torch.optim.Adam([perturbation], lr=0.01)
+   ```
+ 
+
+3. **Perturbed Input Image**: This line creates the perturbed image by adding the perturbation to the original image.
+   ```python
+   input_image_perturbed = input_image + perturbation
+   ```
+   
+
+4. **Objective Function**: it measures the magnitude of the perturbation.
+   ```python
+   f = 0.5 * torch.norm(perturbation) ** 2
+   ```
+ 
+
+5. **Constraint Function**:
+   ```python
+   output = model(input_image_perturbed) # Gets the model's output for the perturbed image.
+   IK = torch.eye(10, device=input_image.device) # Creates a 10x10 identity matrix (for the 10 MNIST classes).
+   one_K = torch.ones(10, device=input_image.device) # Creates a vector of 10 ones.
+   ej = torch.zeros(10, device=input_image.device) 
+   ej[target_label] = 1 # Creates a one-hot vector for the target class.
+   g = (IK - torch.outer(one_K, ej)) @ output.squeeze() # constraint that ensures that the output for the target class is greater than the outputs for all other classes.
+   ```
+    
+
+6. **Unconstrained Subproblem**: The complete loss function that combines the objective function (`f`) and the penalty term.
+   ```python
+   loss = f + tau * torch.sum(torch.relu(g) ** 2)
+   ```
+
+7. **Penalty Parameter Update**: After each iteration, the penalty parameter `tau` is increased by multiplying it by `rho`
+   ```python
+   tau = tau * rho
+   ```
+
+These components work together to iteratively refine the perturbation, balancing the goals of minimizing the perturbation size and achieving misclassification to the target label. The algorithm continues until either the misclassification is achieved or the maximum number of iterations is reached.
+
+Using this SPM algorithm we are able to solve the original constrained problem:
 
 $$\min \frac{1}{2} ||x-x_k||^2 \quad s.t. \quad (I_k - 1_K^T\cdot ej )\cdot C(x_k) \leq 0$$
 
-by solving unconstrained subproblems using a Sequential Penalty approach:
+by solving unconstrained subproblems:
 
-$$
-\begin{cases}
-F(x_k) = f(x_k) + \tau \cdot P(x_k) \qquad \tau \geq 1 \\ \\
-P(x_k)=  \max\\{0,g(x_k)\\}^2
-\end{cases}
-$$
-    
-The unconstrained subproblem to minimize becomes: 
-
-$$\min_{x_k} \frac{1}{2} ||x-x_k||^2 + \tau \cdot \max\{0, (I_k - 1_K^T\cdot ej )\cdot C(x_k)\}^2$$
+$$\min_{x_k} \frac{1}{2} ||x-x_k||^2 + \tau \cdot \max\\{0, (I_k - 1_K^T\cdot ej )\cdot C(x_k)\\}^2$$
 
 ## Experiments
 Several experiments were conducted to assess the effectiveness of the Sequential Penalty Method under different conditions:
 
-- **Different Images**: We also experimented with attacking different images from the MNIST dataset, varying the true label and target label combinations. The attack was consistently effective across different samples, although certain digit pairs required more iterations due to visual similarities between digits.
+1. **Different Images**: We experimented with attacking different images from the MNIST dataset, varying the true label and target label combinations. The attack was consistently effective across different samples, although certain digit pairs required more iterations due to visual similarities between digits.
 
 <p align="center">
   <img src="https://github.com/user-attachments/assets/bb343c79-1863-4e75-94b5-cc97d27046e01" width="800" alt="From 4 to 9" title="From 4 to 9"/> 
@@ -103,7 +137,13 @@ Several experiments were conducted to assess the effectiveness of the Sequential
   <img src="https://github.com/user-attachments/assets/351b730e-c42c-4fc2-a91e-201fc00a5d2f" width="800" alt="From 3 to 0" title="From 3 to 0"/> 
 </p> 
 
-- **Tau Values**: We tested different values for the hyperparameter tau to analyze its impact on the perturbation magnitude and misclassification rate. 
+| input  | target  | iterations |
+|------|------|------------|
+| 4  | 9  | 41       |
+| 3  | 0 | 61        |
+
+
+2. **Different tau Values**: We tested different values for the hyperparameter tau to analyze its impact on the perturbation magnitude and misclassification rate. 
 <p align="center">
   <img src="https://github.com/user-attachments/assets/c8987a5e-6e5e-4347-8aa3-6e88abe2db76" width="800" alt="From 8 to 1, tau0=1, rho=1.1" title="From 8 to 1, tau0=1, rho=1.2"/> 
 </p> 
@@ -116,9 +156,10 @@ Several experiments were conducted to assess the effectiveness of the Sequential
 | 1.0  | 1.1  | 51       |
 | 1.0  | 1.5  | 50        |
 
-AGGIUNGI COMMENTO
+By increasing rho (the tau increment term), we expected a significant reduction in the number of iterations required to corrupt the model. In reality, we noticed that even a slight increase in the value of rho leads to numerical instabilities that prevent the algorithm from converging. In this experiment we can observe how a rho larger than 0.4 only saves one iteration. The result is not very significant.
 
-- **Different Learning Rates**:  We tested different values for the learning rate of the Adam optimizer.
+
+3. **Different Learning Rates**:  We tested different values for the learning rate of the Adam optimizer.
  * **lr=0.1**
   <p align="center">
   <img src="https://github.com/user-attachments/assets/f402117f-3441-4310-a5bf-1c1b94d5875f" width="800" alt="From 8 to 1, tau0=1, rho=1.1" title="From 8 to 1, tau0=1, rho=1.5, lr=0.1"/> 
@@ -134,7 +175,9 @@ AGGIUNGI COMMENTO
 | 1.0  | 1.5  | 0.1 |      9      |
 | 1.0  | 1.5  | 0.01 |      52      |
 
-- **Different Optimizer**: we compared Adam and SGD:
+The use of a larger step drastically reduces the number of iterations needed to corrupt the model.
+
+4. **Different Optimizer**: we compared Adam and SGD:
 * **ADAM**
 <p align="center">
 <img src="https://github.com/user-attachments/assets/ecf9fcbc-a102-4ce9-8c75-7e539cefb623" width="800" alt="From 8 to 1, tau0=1, rho=1.5" title="From 8 to 1, tau0=1, rho=1.5, lr=0.01"/> 
@@ -145,6 +188,7 @@ AGGIUNGI COMMENTO
 <p align="center">
 <img src="https://github.com/user-attachments/assets/86fe880d-21de-4d9a-863b-d5ab8644f06c" width="800" alt="From 8 to 1, SGD, lr=0.01" title="From 8 to 1, SGD, lr=0.01"/> 
 </p> 
+
   
 ## Usage
 
