@@ -51,7 +51,7 @@ def show(model, input_image, input_image_perturbed, perturbation, iterations, ta
 
     # Perturbation
     perturbation_plot = ax3.imshow(perturbation.detach().cpu().squeeze(), cmap='RdBu', norm=plt.Normalize(vmin=-0.5, vmax=0.5))
-    ax3.set_title(f'Perturbation (target label: {target_label}, tau: {round(tau,2)})')
+    ax3.set_title(f'Perturbation (target label: {target_label}, tau: {round(tau,2)}, rho: {rho})')
     ax3.axis('off')
     fig.colorbar(perturbation_plot, ax=ax3, fraction=0.046, pad=0.04)
 
@@ -78,11 +78,12 @@ def show(model, input_image, input_image_perturbed, perturbation, iterations, ta
     plt.savefig(f"results/from_{true_label}_to_{target_label}/{true_label}_to_{target_label}_{iterations}_tau_{round(tau, 2)}_rho_{rho}.png")
     plt.close(fig)
 
-def SQUAT_attack(model, input_image, target_label, true_label, Niter, tau, rho):
-    """Perform SQUAT adversarial attack."""
+def spm_adv_attack(model, input_image, target_label, true_label, Niter, tau, rho):
+    """Perform SPM adversarial attack."""
     print("=> Attacking the input image")
     perturbation = torch.zeros_like(input_image, requires_grad=True)
-    optimizer = torch.optim.Adam([perturbation], lr=0.01)
+    # optimizer = torch.optim.Adam([perturbation], lr=0.01)
+    optimizer = torch.optim.SGD([perturbation], lr=0.01)
     
     for k in range(Niter):
         print(f"=> Solving the unconstraint subproblem {k + 1}")
@@ -127,7 +128,7 @@ def SQUAT_attack(model, input_image, target_label, true_label, Niter, tau, rho):
 
 def main():
     # Parse command line arguments
-    parser = argparse.ArgumentParser(description="SQUAT Attack Script")
+    parser = argparse.ArgumentParser(description="SPM Attack Script")
     parser.add_argument('--true-label', type=int, required=True, help="True label of the input image")
     parser.add_argument('--target-label', type=int, required=True, help="Target label for the attack")
     parser.add_argument('--tau', type=float, default=1, help="Penalty parameter")
@@ -174,7 +175,7 @@ def main():
     model.eval()
 
     # Perform the SQUAT attack
-    input_image_perturbed, perturbation, iterations = SQUAT_attack(
+    input_image_perturbed, perturbation, iterations = spm_adv_attack(
         model, input_image, target_label, true_label, args.Niter, args.tau, args.rho)
 
     # Show and save the final result
