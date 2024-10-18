@@ -82,8 +82,9 @@ def spm_adv_attack(model, input_image, target_label, true_label, Niter, tau, rho
     """Perform SPM adversarial attack."""
     print("=> Attacking the input image")
     perturbation = torch.zeros_like(input_image, requires_grad=True)
-    # optimizer = torch.optim.Adam([perturbation], lr=0.01)
-    optimizer = torch.optim.SGD([perturbation], lr=0.01)
+    optimizer = torch.optim.Adam([perturbation], lr=0.01)
+    # optimizer = torch.optim.SGD([perturbation], lr=0.01)
+    print(f"=> Using Adam optimizer")
     
     for k in range(Niter):
         print(f"=> Solving the unconstraint subproblem {k + 1}")
