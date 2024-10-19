@@ -62,6 +62,11 @@ def show(model, input_image, input_image_perturbed, perturbation, iterations, ta
     ax2.set_title(f'Perturbed Image after {iterations} iterations')
     ax2.axis('off')
 
+    #print perturbation
+    # print(perturbation)
+    #printa max e min e avg
+    # print(f"Max: {perturbation.max().item()}, Min: {perturbation.min().item()}, Avg: {perturbation.mean().item()}")
+
     perturbation_plot = ax3.imshow(perturbation.detach().cpu().squeeze().permute(1, 2, 0), cmap='RdBu')
     ax3.set_title(f'Perturbation (target label: {target_label}, tau: {round(tau,2)}, rho: {rho})')
     ax3.axis('off')
@@ -122,7 +127,7 @@ def spm_adv_attack(model, input_image, target_label, true_label, Niter, tau, rho
     """Perform SPM adversarial attack."""
     print("=> Attacking the input image")
     perturbation = torch.zeros_like(input_image, requires_grad=True)
-    optimizer = torch.optim.Adam([perturbation], lr=0.01)
+    optimizer = torch.optim.Adam([perturbation], lr=0.001)
     # optimizer = torch.optim.Adam([perturbation], lr=0.02)
 
     print(f"=> Using Adam optimizer")
@@ -159,7 +164,6 @@ def spm_adv_attack(model, input_image, target_label, true_label, Niter, tau, rho
         
         # Loss function: perturbation_loss + tau * max{0, g(xk)}^2
         loss = perturbation_loss + tau * torch.sum(torch.relu(g) ** 2)   
-        
         loss.backward()
         optimizer.step()
         
@@ -202,7 +206,7 @@ def main():
 
     # Carica un'immagine a caso da ImageNet
     # per ogni file nella cartella data/img/imagenet-sample-images-master seleziona un'immagine a caso
-    image_path = np.random.choice(glob.glob("data/img/imagenet-sample-images-master/*")) 
+    image_path = np.random.choice(glob.glob("data/img/imagenet-sample-images-master/*"))
 
     # image_path = 'data/img/imagenet-sample-images-master/image_test3.JPEG'  # Sostituisci con il percorso della tua immagine
     image = Image.open(image_path).convert('RGB')
@@ -223,7 +227,7 @@ def main():
         print(f"Classe predetta: {class_name}")
 
     # Definisci la classe target per l'attacco
-    target_label = 56  # Cambia con la tua classe target
+    target_label = 71  # Cambia con la tua classe target
     print(f"Classe target: {labels[target_label]}")
 
     # Definisci i parametri per l'attacco
@@ -231,7 +235,7 @@ def main():
     rho = 1.5
     Niter = 1000
 
-    # Esegui l'attacco SPM
+    # Esegui l'attacco SPM 
     input_perturbed, perturbation, iterations = spm_adv_attack(model, input_tensor, target_label, predicted_class, Niter, tau, rho)
 
     # Effettua una predizione sull'immagine perturbata
