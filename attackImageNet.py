@@ -81,9 +81,9 @@ def show(model, input_image, input_image_perturbed, perturbation, iterations, ta
 def spm_adv_attack(model, input_image, target_label, true_label, Niter, tau, rho):
     """Perform SPM adversarial attack."""
     print("=> Attacking the input image")
-    perturbation = torch.zeros_like(input_image, requires_grad=True)
-    # optimizer = torch.optim.Adam([perturbation], lr=0.01)
-    optimizer = torch.optim.SGD([perturbation], lr=0.01)
+    perturbation = torch.zeros_like(input_image, requires_grad=False)
+    optimizer = torch.optim.Adam([perturbation], lr=0.01)
+    # optimizer = torch.optim.SGD([perturbation], lr=0.01)
     print(f"=> Using Adam optimizer")
     
     for k in range(Niter):
@@ -99,9 +99,9 @@ def spm_adv_attack(model, input_image, target_label, true_label, Niter, tau, rho
         
         # g(xk) = (IK - 1K^T*ej)C(xk)
         output = model(input_image_perturbed)
-        IK = torch.eye(10, device=input_image.device)
-        one_K = torch.ones(10, device=input_image.device)
-        ej = torch.zeros(10, device=input_image.device)
+        IK = torch.eye(1000, device=input_image.device)
+        one_K = torch.ones(1000, device=input_image.device)
+        ej = torch.zeros(1000, device=input_image.device)
         ej[target_label] = 1
         
         g = (IK - torch.outer(one_K, ej)) @ output.squeeze()
@@ -112,7 +112,7 @@ def spm_adv_attack(model, input_image, target_label, true_label, Niter, tau, rho
         loss.backward()
         optimizer.step()
         
-        if k % 1 == 0:
+        if k % 20 == 0:
             show(model, input_image, input_image_perturbed, perturbation, k, target_label.item(), true_label.item(), tau, rho)
 
         # Check if the perturbation satisfies the misclassification constraint
@@ -134,7 +134,7 @@ def main():
     parser.add_argument('--target-label', type=int, required=True, help="Target label for the attack")
     parser.add_argument('--tau', type=float, default=1, help="Penalty parameter")
     parser.add_argument('--rho', type=float, default=1.5, help="Incremental coefficient for the penalty parameter")
-    parser.add_argument('--Niter', type=int, default=1000, help="Number of iterations")
+    parser.add_argument('--Niter', type=int, default=10000, help="Number of iterations")
     args = parser.parse_args()
 
     # Select the device (GPU if available)
