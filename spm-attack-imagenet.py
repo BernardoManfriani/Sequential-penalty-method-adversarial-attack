@@ -69,11 +69,37 @@ def show(model, input_image, input_image_perturbed, perturbation, iterations, ta
         original_logits = torch.softmax(model(input_image).cpu().squeeze(), dim=0)
         perturbed_logits = torch.softmax(model(input_image_perturbed).cpu().squeeze(), dim=0)
 
-    x = np.arange(10)
+    # Seleziona le prime 10 classi predette
+    topk_original = torch.topk(original_logits, 10)
+    topk_perturbed = torch.topk(perturbed_logits, 10)
+
+    # Aggiungi la classe target se non è già tra le top 10
+    target_value_original = original_logits[target_label].item()
+    target_value_perturbed = perturbed_logits[target_label].item()
+    
+    indices = topk_original.indices.tolist()
+    values_original = topk_original.values.tolist()
+    values_perturbed = topk_perturbed.values.tolist()
+    
+    if target_label not in indices:
+        indices.append(target_label)
+        values_original.append(target_value_original)
+        values_perturbed.append(target_value_perturbed)
+    
+    # Ordina per indici
+    indices, values_original, values_perturbed = zip(*sorted(zip(indices, values_original, values_perturbed), key=lambda x: -x[1]))
+    
+    # Limita a massimo 11 classi, includendo la target
+    indices = indices[:11]
+    values_original = values_original[:11]
+    values_perturbed = values_perturbed[:11]
+    
+    
+    x = np.arange(len(indices))
     bar_width = 0.35
 
-    ax4.bar(x - bar_width / 2, original_logits[:10], bar_width, label='Original', color='b')
-    ax4.bar(x + bar_width / 2, perturbed_logits[:10], bar_width, label='Perturbed', color='r')
+    ax4.bar(x - bar_width / 2, values_original, bar_width, label='Original', color='b')
+    ax4.bar(x + bar_width / 2, values_perturbed, bar_width, label='Perturbed', color='r')
     ax4.set_title(f'Model Logits after {iterations} iterations')
     ax4.set_xlabel('Class')
     ax4.set_ylabel('Probability')
@@ -88,6 +114,7 @@ def show(model, input_image, input_image_perturbed, perturbation, iterations, ta
     plt.close(fig)
 
 def spm_adv_attack_imagenet(model, input_image, target_label, true_label, Niter, tau, rho):
+
     """Perform Sequential Penalty Attack adversarial attack."""
     print("=> Attacking the input image")
     perturbation = torch.zeros_like(input_image, requires_grad=True)
@@ -122,7 +149,7 @@ def spm_adv_attack_imagenet(model, input_image, target_label, true_label, Niter,
         loss.backward()
         optimizer.step()
         
-        if k % 1 == 0:  # Changed to show every 10 iterations
+        if k % 1 == 0:  
             show(model, input_image, input_image_perturbed, perturbation, k, target_label.item(), true_label.item(), tau, rho)
 
         # Check if the perturbation satisfies the misclassification constraint

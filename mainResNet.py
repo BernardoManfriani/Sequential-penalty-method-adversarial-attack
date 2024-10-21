@@ -38,6 +38,60 @@ def create_gif_from_png(folder_path, output_path='output.gif', duration=500):
     print(f"GIF created and saved as {output_path}")
     return output_path
 
+def denormalize(tensor):
+    """Denormalize the tensor using ImageNet mean and std."""
+    mean = torch.tensor([0.485, 0.456, 0.406]).view(3, 1, 1)
+    std = torch.tensor([0.229, 0.224, 0.225]).view(3, 1, 1)
+    return tensor * std + mean
+
+def showEd(model, input_image, input_image_perturbed, perturbation, iterations, target_label, true_label, tau, rho):
+    """Plot and save the original image, perturbed image, perturbation, and logits."""
+    fig, (ax1, ax2, ax3, ax4) = plt.subplots(1, 4, figsize=(20, 5))
+
+    # Original image
+    original = denormalize(input_image.detach().cpu().squeeze())
+    ax1.imshow(original.permute(1, 2, 0).clip(0, 1))
+    ax1.set_title('Original Image')
+    ax1.axis('off')
+
+    # Perturbed image
+    perturbed = denormalize(input_image_perturbed.detach().cpu().squeeze())
+    ax2.imshow(perturbed.permute(1, 2, 0).clip(0, 1))
+    ax2.set_title(f'Perturbed Image after {iterations} iterations')
+    ax2.axis('off')
+
+    # Perturbation
+    perturbation_display = perturbation.detach().cpu().squeeze().permute(1, 2, 0)
+    perturbation_display = (perturbation_display - perturbation_display.min()) / (perturbation_display.max() - perturbation_display.min())
+    perturbation_plot = ax3.imshow(perturbation_display, cmap='RdBu')
+    ax3.set_title(f'Perturbation (target label: {target_label}, tau: {round(tau,2)}, rho: {rho})')
+    ax3.axis('off')
+    fig.colorbar(perturbation_plot, ax=ax3, fraction=0.046, pad=0.04)
+
+
+    # Logits    
+    with torch.no_grad():
+        original_logits = torch.softmax(model(input_image).cpu().squeeze(), dim=0)
+        perturbed_logits = torch.softmax(model(input_image_perturbed).cpu().squeeze(), dim=0)
+
+    x = np.arange(10)
+    bar_width = 0.35
+
+    ax4.bar(x - bar_width / 2, original_logits[:10], bar_width, label='Original', color='b')
+    ax4.bar(x + bar_width / 2, perturbed_logits[:10], bar_width, label='Perturbed', color='r')
+    ax4.set_title(f'Model Logits after {iterations} iterations')
+    ax4.set_xlabel('Class')
+    ax4.set_ylabel('Probability')
+    ax4.legend()
+    ax4.grid(True)
+
+    # Save the figure
+    os.makedirs(f"results/imagenet/from_{true_label}_to_{target_label}", exist_ok=True)
+
+    plt.tight_layout()
+    plt.savefig(f"results/imagenet/from_{true_label}_to_{target_label}/{true_label}_to_{target_label}_{iterations}_tau_{round(tau, 2)}_rho_{rho}.png")
+    plt.close(fig)
+
 
 def show(model, input_image, input_image_perturbed, perturbation, iterations, target_label, true_label, tau, rho):
     """Plot and save the original image, perturbed image, perturbation, and logits."""
@@ -52,13 +106,13 @@ def show(model, input_image, input_image_perturbed, perturbation, iterations, ta
     # Original image (riporta i valori in [0, 1])
     original_image = input_image.detach().cpu().squeeze().permute(1, 2, 0)
     original_image = (original_image - original_image.min()) / (original_image.max() - original_image.min())
-    ax1.imshow(original_image)
+    ax1.imshowEd(original_image)
     ax1.set_title('Original Image')
     ax1.axis('off')
 
     perturbed_image = input_image_perturbed.detach().cpu().squeeze().permute(1, 2, 0) 
     perturbed_image = (perturbed_image - perturbed_image.min()) / (perturbed_image.max() - perturbed_image.min())
-    ax2.imshow(perturbed_image)
+    ax2.imshowEd(perturbed_image)
     ax2.set_title(f'Perturbed Image after {iterations} iterations')
     ax2.axis('off')
 
@@ -168,7 +222,7 @@ def spm_adv_attack(model, input_image, target_label, true_label, Niter, tau, rho
         optimizer.step()
         
         if k % 1 == 0:
-            show(model, input_image, input_image_perturbed, perturbation, k, target_label, true_label, tau, rho)
+            showEd(model, input_image, input_image_perturbed, perturbation, k, target_label, true_label, tau, rho)
 
         # Check if the perturbation satisfies the misclassification constraint
         with torch.no_grad():
@@ -246,7 +300,7 @@ def main():
         print(f"Classe predetta (perturbata): {class_name_perturbed}")
     
     # Mostra e salva i risultati
-    show(model, input_tensor, input_perturbed, perturbation, iterations, target_label, predicted_class.item(), tau, rho)
+    showEd(model, input_tensor, input_perturbed, perturbation, iterations, target_label, predicted_class.item(), tau, rho)
 
     # Crea un GIF dell'attacco
     create_gif_from_png(f"results/from_{predicted_class.item()}_to_{target_label}", 
