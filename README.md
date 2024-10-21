@@ -156,7 +156,27 @@ $$e_j=\left (
 \end{matrix}
 \right )$$
 
-8. Constraint function g:
+8.
+
+$$
+(IK-1_k^T*e_j)=\left (
+\begin{matrix}
+1  & 0  & 0  & 0  & 0  & 0  & 0  & 0  & -1 & 0 \\
+0  & 1  & 0  & 0  & 0  & 0  & 0  & 0  & -1 & 0 \\
+0  & 0  & 1  & 0  & 0  & 0  & 0  & 0  & -1 & 0 \\
+0  & 0  & 0  & 1  & 0  & 0  & 0  & 0  & -1 & 0 \\
+0  & 0  & 0  & 0  & 1  & 0  & 0  & 0  & -1 & 0 \\
+0  & 0  & 0  & 0  & 0  & 1  & 0  & 0  & -1 & 0 \\
+0  & 0  & 0  & 0  & 0  & 0  & 1  & 0  & -1 & 0 \\
+0  & 0  & 0  & 0  & 0  & 0  & 0  & 1  & -1 & 0 \\
+0  & 0  & 0  & 0  & 0  & 0  & 0  & 0  & 0  & 0 \\
+0  & 0  & 0  & 0  & 0  & 0  & 0  & 0  & -1 & 1
+\end{matrix}
+\right )
+$$
+
+
+10. Constraint function g:
    
 $$g = \left (
 \begin{matrix}
@@ -229,9 +249,15 @@ The use of a larger step drastically reduces the number of iterations needed to 
 <img src="https://github.com/user-attachments/assets/86fe880d-21de-4d9a-863b-d5ab8644f06c" width="800" alt="From 8 to 1, SGD, lr=0.01" title="From 8 to 1, SGD, lr=0.01"/> 
 </p> 
 
-4. **Different Dataset**: We tested the algorithm on ImageNet as well to observe its behavior with higher resolution images (224,224,3). Running the command `python spm-attack-imagenet.py` executes an adversarial attack on an image of a goldfish directed at a hen.
+4. **Different Dataset**: We tested the algorithm on ImageNet as well to observe its behavior with higher resolution images (224,224,3).
+*   
 <p align="center">
-<img src="https://github.com/user-attachments/assets/cd09ffb4-e085-4ef1-9dc7-61a7f4ebac22" width="800" alt="From 8 to 1, SGD, lr=0.01" title="From 8 to 1, SGD, lr=0.01"/> 
+<img src="https://github.com/user-attachments/assets/d79fceaf-169d-4f96-97bd-a97979bc65fa" width="800"/> 
+</p> 
+
+*
+<p align="center">
+<img src="https://github.com/user-attachments/assets/674840d8-3491-450b-a975-b5ffb7049123" width="800"/> 
 </p> 
 
 ## Usage
@@ -272,8 +298,8 @@ The results are saved in the `results/mnist` or `results/imagenet` directory.
 
 ## References
 
-- Beuzeville et al., "Adversarial Attacks via Sequential Quadratic Programming", 2024. \cite{beuzeville2024}
-- Rony et al., "Sequential Penalty Method for Adversarial Attacks", 2021. \cite{rony2021}
-- Grippo et al., "Sequential Penalty Methods: Theory and Applications", 2023. \cite{grippo2023}
+- Beuzeville et al., "Adversarial Attacks via Sequential Quadratic Programming", 2024.  
+- Rony et al., "Sequential Penalty Method for Adversarial Attacks", 2021. 
+- Grippo et al., "Sequential Penalty Methods: Theory and Applications", 2023. 
 
 
