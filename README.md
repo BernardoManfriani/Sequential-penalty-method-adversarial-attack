@@ -190,7 +190,10 @@ The use of a larger step drastically reduces the number of iterations needed to 
 </p> 
 
 4. **Different Dataset**: We tested the algorithm on ImageNet as well to observe its behavior with higher resolution images (224,224,3). Running the command `python spm-attack-imagenet.py` executes an adversarial attack on an image of a goldfish directed at a hen.
-  
+<p align="center">
+<img src="https://github.com/user-attachments/assets/cd09ffb4-e085-4ef1-9dc7-61a7f4ebac22" width="800" alt="From 8 to 1, SGD, lr=0.01" title="From 8 to 1, SGD, lr=0.01"/> 
+</p> 
+
 ## Usage
 
 ### Training the Model
