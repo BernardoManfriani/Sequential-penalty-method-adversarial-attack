@@ -73,28 +73,36 @@ def show(model, input_image, input_image_perturbed, perturbation, iterations, ta
     topk_original = torch.topk(original_logits, 10)
     topk_perturbed = torch.topk(perturbed_logits, 10)
 
-    # Aggiungi la classe target se non è già tra le top 10
-    target_value_original = original_logits[target_label].item()
-    target_value_perturbed = perturbed_logits[target_label].item()
-    
-    indices = topk_original.indices.tolist()
+    # Ottieni gli indici e i valori delle top 10 classi
+    indices_original = topk_original.indices.tolist()
     values_original = topk_original.values.tolist()
     values_perturbed = topk_perturbed.values.tolist()
-    
-    if target_label not in indices:
-        indices.append(target_label)
-        values_original.append(target_value_original)
-        values_perturbed.append(target_value_perturbed)
-    
-    # Ordina per indici
-    indices, values_original, values_perturbed = zip(*sorted(zip(indices, values_original, values_perturbed), key=lambda x: -x[1]))
-    
-    # Limita a massimo 11 classi, includendo la target
-    indices = indices[:11]
-    values_original = values_original[:11]
-    values_perturbed = values_perturbed[:11]
-    
-    
+
+    # Controlla se la classe target è tra le top 10
+    if target_label not in indices_original:
+        # Se non è presente, aggiungila alla lista e includi i suoi valori predetti
+        indices_original.append(target_label)
+        values_original.append(original_logits[target_label].item())
+        values_perturbed.append(perturbed_logits[target_label].item())
+
+    # Crea un dizionario per accoppiare indice e valore e ordina
+    paired = list(zip(indices_original, values_original, values_perturbed))
+    # Ordina per probabilità del modello originale in ordine decrescente, assicurando che la classe target sia inclusa
+    paired = sorted(paired, key=lambda x: (x[0] == target_label, x[1]), reverse=True)
+
+    # Mantieni solo i primi 10, assicurando che la classe target sia inclusa
+    if len(paired) > 10:
+        # Se la classe target è nell'elenco ma non è nei primi 10, sostituisci l'ultimo con la classe target
+        if target_label not in [x[0] for x in paired[:10]]:
+            paired[-1] = next(item for item in paired if item[0] == target_label)
+
+    # Prendi solo le prime 10 classi
+    paired = paired[:10]
+
+    # Separa di nuovo gli indici e i valori
+    indices, values_original, values_perturbed = zip(*paired)
+
+    # Plot dei risultati
     x = np.arange(len(indices))
     bar_width = 0.35
 
@@ -103,6 +111,8 @@ def show(model, input_image, input_image_perturbed, perturbation, iterations, ta
     ax4.set_title(f'Model Logits after {iterations} iterations')
     ax4.set_xlabel('Class')
     ax4.set_ylabel('Probability')
+    ax4.set_xticks(x)
+    ax4.set_xticklabels(indices, rotation=45, ha='right') # Imposta le etichette delle classi
     ax4.legend()
     ax4.grid(True)
 
@@ -191,10 +201,12 @@ def main():
     print(f"=> Using device: {device}")
 
     # Load and preprocess the image
-    input_image = load_and_preprocess_image("n01443537_goldfish.JPEG", device)
-    true_label = torch.tensor(1).to(device) # goldfish
-    target_label = torch.tensor(7).to(device) # 9 hen, 6
-
+    # input_image = load_and_preprocess_image("data/img/imagenet-sample-images-master/n01443537_goldfish.JPEG", device)
+    input_image = load_and_preprocess_image("data/img/imagenet-sample-images-master/n01496331_electric_ray.JPEG", device)
+    # true_label = torch.tensor(1).to(device) # goldfish
+    # target_label = torch.tensor(9).to(device) 
+    true_label = torch.tensor(5).to(device) # electric ray
+    target_label = torch.tensor(134).to(device) 
     # Load the model (ResNet18)
     model = resnet18(weights=ResNet18_Weights.IMAGENET1K_V1).to(device)
     model.eval()

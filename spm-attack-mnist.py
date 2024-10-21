@@ -183,7 +183,7 @@ def main():
     show(model, input_image, input_image_perturbed, perturbation, iterations, target_label.item(), true_label.item(), args.tau, args.rho)
     
     # Create a GIF of the attack
-    create_gif_from_png(f"results/mnist/from_{true_label.item()}_to_{target_label.item()}", 
+    create_gif_from_png(f"results/from_{true_label.item()}_to_{target_label.item()}", 
                         output_path=f"results/from_{true_label.item()}_to_{target_label.item()}/output.gif", 
                         duration=500)
 
