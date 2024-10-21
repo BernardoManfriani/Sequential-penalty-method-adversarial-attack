@@ -72,10 +72,10 @@ def show(model, input_image, input_image_perturbed, perturbation, iterations, ta
     ax4.grid(True)
 
     # Save the figure
-    os.makedirs(f"results/from_{true_label}_to_{target_label}", exist_ok=True)
+    os.makedirs(f"results/mnist/from_{true_label}_to_{target_label}", exist_ok=True)
 
     plt.tight_layout()
-    plt.savefig(f"results/from_{true_label}_to_{target_label}/{true_label}_to_{target_label}_{iterations}_tau_{round(tau, 2)}_rho_{rho}.png")
+    plt.savefig(f"results/mnist/from_{true_label}_to_{target_label}/{true_label}_to_{target_label}_{iterations}_tau_{round(tau, 2)}_rho_{rho}.png")
     plt.close(fig)
 
 def spm_adv_attack(model, input_image, target_label, true_label, Niter, tau, rho):
@@ -183,7 +183,7 @@ def main():
     show(model, input_image, input_image_perturbed, perturbation, iterations, target_label.item(), true_label.item(), args.tau, args.rho)
     
     # Create a GIF of the attack
-    create_gif_from_png(f"results/from_{true_label.item()}_to_{target_label.item()}", 
+    create_gif_from_png(f"results/mnist/from_{true_label.item()}_to_{target_label.item()}", 
                         output_path=f"results/from_{true_label.item()}_to_{target_label.item()}/output.gif", 
                         duration=500)
 
