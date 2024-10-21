@@ -1,5 +1,4 @@
 ## Overview
-
 This repository contains the implementation of adversarial attacks on the MNIST dataset using the Sequential Penalty Method (SPM). The approach focuses on generating adversarial examples that force a classifier to misclassify an image by introducing minimal perturbations, ensuring the changes are imperceptible to humans while still deceiving the machine learning model.
 
 ## Introduction
@@ -7,35 +6,6 @@ This repository contains the implementation of adversarial attacks on the MNIST 
 Adversarial attacks are techniques used to deceive machine learning models by introducing small, carefully crafted perturbations to the input data. These perturbations are generally imperceptible to humans but can cause a model to make incorrect predictions. In this project, we implement a **Sequential Penalty Method** to carry out adversarial attacks on images from the MNIST dataset.
 
 The **Sequential Penalty Method (SPM)** transforms a constrained optimization problem into a series of unconstrained subproblems by introducing a penalty function. At each iteration, the penalty parameter is increased to enforce constraint satisfaction while minimizing the objective function. This method ensures that the adversarial perturbation remains small while still achieving misclassification.
-
-### Problem Formulation
-
-The constrained optimization problem is defined as follows:
-
-
-$$\min f(x) \quad \text{s.t.} \quad g(x) \leq 0$$
-
-Where:
-
-- $f(x) = \frac{1}{2} \|x - x_k\|^2$ : This objective function minimizes the difference between the perturbed image $x$ and the original image $x_k$.
-
-- $g(x) = (I_k - 1^T_k \cdot e_j) \cdot C(x_k) $: This inequality constraint ensures that the classifier misclassifies the perturbed image into the target class $j$. Here, $C(x_k)$ represents the classifier's prediction output, and $e_j$ is the target class vector. Inserire le matrici e il vettore tipo esplicitare il prodotto.
-
-
-[QUI AGGIUNGEREI COME SI PASSA DA UN PROBLEMA VINCOLATO A UNO NON VINCOLATO]
-The penalty function $P(x) =\max\\{0, g(x)\\}^2$ is applied iteratively, and the penalty parameter $\tau$ is increased over time to force the solution towards satisfying the constraints while minimizing $f(x)$.
-
-
-
-## Requirements
-
-Requirements
-
-To run this project, you will need to install all the requirements with following command.
-
-```bash
-pip install -r requirements.txt
-```
 
 ## Model and Dataset
 
@@ -53,6 +23,17 @@ The model was trained using the Adam optimizer (learning rate of 0.001) with cro
   <img src="https://github.com/user-attachments/assets/c468d977-696a-49e7-9293-c64fdbbf16df" width="400" alt="Train Loss" title="Train Loss"/> 
   <img src="https://github.com/user-attachments/assets/d940f9bf-499a-4d4d-b083-743d27239aaf" width="400" alt="Train Accuracy" title="Train Accuracy"/>
 </p> 
+
+## Problem Formulation
+The constrained optimization problem is defined as follows:
+
+$$\min f(x) \quad \text{s.t.} \quad g(x) \leq 0$$
+
+Where:
+
+- $f(x) = \frac{1}{2} \||x - x_k\||^2$ : This objective function minimizes the difference between the perturbed image $x$ and the original image $x_k$.
+
+- $g(x) = (I_k - 1^T_k \cdot e_j) \cdot C(x_k) $: This inequality constraint ensures that the classifier misclassifies the perturbed image into the target class $j$. Here, $C(x_k)$ represents the classifier's prediction output, and $e_j$ is the target class vector. Inserire le matrici e il vettore tipo esplicitare il prodotto.
 
 
 ## Sequential Penalty Methods
@@ -127,6 +108,63 @@ by solving unconstrained subproblems:
 
 $$\min_{x_k} \frac{1}{2} ||x-x_k||^2 + \tau \cdot \max\\{0, (I_k - 1_K^T\cdot ej )\cdot C(x_k)\\}^2$$
 
+### Deep Dive Into SMP
+Let's have a look at the second iteration (target_label=8).
+
+1. Objective function:
+
+$$f=0.8900532722473145$$
+
+3. Model output:
+   
+$$
+\left (
+\begin{matrix}
+-4.0147 & 13.6417 & -0.8090 & -4.4129 & 0.6421 & -1.7495 & 0.3227 & -0.3685 & -0.1891 & -3.0631
+\end{matrix}
+\right )
+$$
+
+4. Identical Matrix IK
+   
+$$I_K=\left ( \begin{matrix}
+1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 \\
+0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 \\
+0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1
+\end{matrix} \right )$$
+
+6. All ones vector:
+ 
+$$one_K = \left (
+\begin{matrix}
+1 & 1 & 1 & 1 & 1 & 1 & 1 & 1 & 1 & 1
+\end{matrix}
+\right )$$
+
+7. Canonical vector:
+   
+$$e_j=\left (
+\begin{matrix}
+0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0
+\end{matrix}
+\right )$$
+
+8. Constraint function g:
+   
+$$g = \left (
+\begin{matrix}
+-3.8256 & 13.8309 & -0.6199 & -4.2238 & 0.8312 & -1.5604 & 0.5119 & -0.1794 & 0.0000 & -2.8740
+\end{matrix}
+\right )$$
+
+
 ## Experiments
 Several experiments were conducted to assess the effectiveness of the Sequential Penalty Method under different conditions:
 
@@ -197,26 +235,39 @@ The use of a larger step drastically reduces the number of iterations needed to 
 </p> 
 
 ## Usage
+### Requirements
+
+Requirements
+
+To run this project, you will need to install all the requirements with following command.
+
+```bash
+pip install -r requirements.txt
+```
 
 ### Training the Model
 
 To train the SmallCNN model on the MNIST dataset, use the following command:
 
 ```bash
-python main.py --epochs 10
+python train-cnn.py --epochs 10
 ```
 
 This will train the model for 10 epochs and save the weights in the `checkpoints/` directory.
 
 ### Running the Adversarial Attacks
 
-To run the adversarial attacks using the Sequential Penalty Method, execute the following command:
+To run the adversarial attacks using the Sequential Penalty Method on MNIST/ImageNet, execute the following command:
 
 ```bash
-python squat-penalty-attack.py --true-label 3 --target-label 7 --tau 1.0 --rho 1.5 --Niter 1000
+python spm-attack-mnist.py --true-label 3 --target-label 7 --tau 1.0 --rho 1.5 --Niter 100
+```
+```bash
+python spm-attack-imagenet.py --target-label 134 --image-path data/img/imagenet-sample-images-master/n01774750_tarantula.JPEG
 ```
 
-The results are saved in the `results/` directory.
+The results are saved in the `results/mnist` or `results/imagenet` directory.
+
 
 
 ## References
