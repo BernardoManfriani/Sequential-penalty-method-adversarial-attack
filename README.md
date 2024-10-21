@@ -19,9 +19,11 @@ Where:
 
 - $f(x) = \frac{1}{2} \|x - x_k\|^2$ : This objective function minimizes the difference between the perturbed image $x$ and the original image $x_k$.
 
-- $g(x) = (I_k - 1^T_k \cdot e_j) \cdot C(x_k) $: This inequality constraint ensures that the classifier misclassifies the perturbed image into the target class $j$. Here, $C(x_k)$ represents the classifier's prediction output, and $e_j$ is the target class vector.
+- $g(x) = (I_k - 1^T_k \cdot e_j) \cdot C(x_k) $: This inequality constraint ensures that the classifier misclassifies the perturbed image into the target class $j$. Here, $C(x_k)$ represents the classifier's prediction output, and $e_j$ is the target class vector. Inserire le matrici e il vettore tipo esplicitare il prodotto.
 
-The penalty function $P(x) = \max\\{0, g(x)\\}^2$ is applied iteratively, and the penalty parameter $\tau$ is increased over time to force the solution towards satisfying the constraints while minimizing $f(x)$.
+
+[QUI AGGIUNGEREI COME SI PASSA DA UN PROBLEMA VINCOLATO A UNO NON VINCOLATO]
+The penalty function $P(x) =\max\\{0, g(x)\\}^2$ is applied iteratively, and the penalty parameter $\tau$ is increased over time to force the solution towards satisfying the constraints while minimizing $f(x)$.
 
 
 

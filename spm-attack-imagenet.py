@@ -189,11 +189,13 @@ def load_and_preprocess_image(image_path, device):
 
 
 def main():
-    # Parse command line arguments
+     # Parse command line arguments
     parser = argparse.ArgumentParser(description="SPM Attack Script")
     parser.add_argument('--tau', type=float, default=1, help="Penalty parameter")
     parser.add_argument('--rho', type=float, default=1.5, help="Incremental coefficient for the penalty parameter")
     parser.add_argument('--Niter', type=int, default=100, help="Number of iterations")
+    parser.add_argument('--target-label', type=int, required=True, help="The target class label for the adversarial attack")
+    parser.add_argument('--image-path', type=str, required=True, help="Path to the input image file")
     args = parser.parse_args()
 
     # Select the device (GPU if available)
@@ -201,31 +203,35 @@ def main():
     print(f"=> Using device: {device}")
 
     # Load and preprocess the image
-    # input_image = load_and_preprocess_image("data/img/imagenet-sample-images-master/n01443537_goldfish.JPEG", device)
-    input_image = load_and_preprocess_image("data/img/imagenet-sample-images-master/n01496331_electric_ray.JPEG", device)
-    # true_label = torch.tensor(1).to(device) # goldfish
-    # target_label = torch.tensor(9).to(device) 
-    true_label = torch.tensor(5).to(device) # electric ray
-    target_label = torch.tensor(134).to(device) 
+    input_image = load_and_preprocess_image(args.image_path, device)
+    
+    target_label = torch.tensor(args.target_label).to(device)
+
     # Load the model (ResNet18)
     model = resnet18(weights=ResNet18_Weights.IMAGENET1K_V1).to(device)
     model.eval()
+    true_label = model(input_image).argmax()
     print(f"First model prediction: {model(input_image).argmax().item()}")
-    
+    #print target class object from imagenet_classes.txt
+    with open('data/img/imagenet_classes.txt') as f:
+        classes = [line.strip() for line in f.readlines()]
+    print(f"True label: {classes[target_label.item()]}")
+
     # Perform the SPM attack
     input_image_perturbed, perturbation, iterations = spm_adv_attack_imagenet(
         model, input_image, target_label, true_label, args.Niter, args.tau, args.rho)
-    
+
     # Save the tensor
     torch.save(input_image_perturbed, "results/imagenet/perturbed_image_tensor.pt")
-    
+
     # Show and save the final result
     show(model, input_image, input_image_perturbed, perturbation, iterations, target_label.item(), true_label.item(), args.tau, args.rho)
-    
+
     # Create a GIF of the attack
-    create_gif_from_png(f"results/imagenet/from_{true_label.item()}_to_{target_label.item()}", 
-                        output_path=f"results/imagenet/from_{true_label.item()}_to_{target_label.item()}/output.gif", 
+    create_gif_from_png(f"results/imagenet/from_{true_label.item()}_to_{target_label.item()}",
+                        output_path=f"results/imagenet/from_{true_label.item()}_to_{target_label.item()}/output.gif",
                         duration=500)
+
 
 if __name__ == "__main__":
     main()

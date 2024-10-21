@@ -134,7 +134,7 @@ def main():
     parser.add_argument('--target-label', type=int, required=True, help="Target label for the attack")
     parser.add_argument('--tau', type=float, default=1, help="Penalty parameter")
     parser.add_argument('--rho', type=float, default=1.5, help="Incremental coefficient for the penalty parameter")
-    parser.add_argument('--Niter', type=int, default=1000, help="Number of iterations")
+    parser.add_argument('--Niter', type=int, default=100, help="Number of iterations")
     args = parser.parse_args()
 
     # Select the device (GPU if available)
