@@ -90,7 +90,7 @@ In our specific implementation, we have the following key components:
 
 6. **Unconstrained Subproblem**: The complete loss function that combines the objective function (`f`) and the penalty term.
    ```python
-   loss = f + tau * torch.sum(torch.relu(g) ** 2)
+   loss = f + tau * torch.sum(torch.max(g) ** 2)
    ```
 
 7. **Penalty Parameter Update**: After each iteration, the penalty parameter `tau` is increased by multiplying it by `rho`
