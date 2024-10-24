@@ -31,7 +31,7 @@ $$\min f(x) \quad \text{s.t.} \quad g(x) \leq 0$$
 
 Where:
 
-- $f(x) = \frac{1}{2} \||x - x_k\||^2$ : This objective function minimizes the difference between the perturbed image $x$ and the original image $x_k$.
+- $f(x) = \frac{1}{2} \||x - x_k\||^2$ : This objective function minimizes the difference between the perturbed image $x_k$ and the original image $x$.
 
 - $g(x) = (I_k - 1^T_k \cdot e_j) \cdot C(x_k) $: This inequality constraint ensures that the classifier misclassifies the perturbed image into the target class $j$. Here, $C(x_k)$ represents the classifier's prediction output, and $e_j$ is the target class vector. Inserire le matrici e il vettore tipo esplicitare il prodotto.
 
