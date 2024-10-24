@@ -106,7 +106,7 @@ $$\min \frac{1}{2} ||x-x_k||^2 \quad s.t. \quad (I_k - 1_K^T\cdot ej )\cdot C(x_
 
 by solving unconstrained subproblems:
 
-$$\min_{x_k} \frac{1}{2} ||x-x_k||^2 + \tau \cdot \max\\{0, (I_k - 1_K^T\cdot ej )\cdot C(x_k)\\}^2$$
+$$\min \frac{1}{2} ||x-x_k||^2 + \tau \cdot \max\\{0, (I_k - 1_K^T\cdot ej )\cdot C(x_k)\\}^2$$
 
 ### Deep Dive Into SMP
 Let's have a look at the second iteration (target_label=8).
